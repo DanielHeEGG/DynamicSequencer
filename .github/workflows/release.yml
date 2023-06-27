@@ -1,0 +1,24 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*.*"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: microsoft/setup-msbuild@v1
+      - uses: NuGet/setup-nuget@v1
+      - run: nuget restore DynamicSequencer.sln
+      - run: msbuild.exe DynamicSequencer.sln /p:platform="Any CPU" /p:configuration="Release"
+      - run: git clone https://bitbucket.org/Isbeorn/nina.plugin.manifests.git manifest
+      - shell: pwsh
+        run: manifest/tools/CreateManifest.ps1 -file bin/Release/DanielHeEGG.NINA.DynamicSequencer.dll -installerUrl https://github.com/DanielHeEGG/DynamicSequencer/releases/download/${{ github.ref_name }}/DanielHeEGG.NINA.DynamicSequencer.dll
+      - uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            bin/Release/DanielHeEGG.NINA.DynamicSequencer.dll
+            manifest.json
