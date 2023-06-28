@@ -50,7 +50,7 @@ using System.Runtime.InteropServices;
 //[Optional] An additional url to an example example screenshot of your plugin in action
 [assembly: AssemblyMetadata("AltScreenshotURL", "")]
 //[Optional] An in-depth description of your plugin
-[assembly: AssemblyMetadata("LongDescription", @"		")]
+[assembly: AssemblyMetadata("LongDescription", @"A plugin for NINA that dynamically selects an optimal target for imaging, allowing for unattended, multi-night, multi-target automated imaging.")]
 
 // Setting ComVisible to false makes the types in this assembly not visible
 // to COM components.  If you need to access a type in this assembly from

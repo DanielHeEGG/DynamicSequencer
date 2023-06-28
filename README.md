@@ -1,1 +1,151 @@
 ﻿# DynamicSequencer
+A plugin for [NINA](https://nighttime-imaging.eu) that dynamically selects an optimal target for imaging, allowing for unattended, multi-night, multi-target automated imaging.
+
+When configured correctly, the plugin selects a target from the pool of targets defined by the user based on configurable criteria and interfaces seamlessly with the NINA advanced sequencer.
+
+This plugin is heavily inspired by Tom Palmer's [Target Scheduler](https://tcpalmer.github.io/nina-scheduler/) Plugin and is very similar in nature. In fact, Dynamic Sequencer began as a private fork of Target Scheduler. However, the amount of changes made slowly grew until the point that it made more sense to completely rewrite it. Large sections of code were directly copied from Target Scheduler.
+
+This plugin differs from Target Scheduler in two main aspects:
+1. Targets are defined by JSON files, no graphical interface is available within NINA.
+2. Individual sequencer instructions are provided instead of one large container (slew, take exposure, change filter vs. one  container that does everything).
+
+This allows for further integration with other scripts that work with JSON, and allow for more granular control.
+
+If you're looking for a more straightforward and plug-and-play solution, Target Scheduler may be better suited for your needs. But if you want more control, this plugin may work better.
+
+> **DISCLAIMER**
+> This plugin is in early stages of development and comes with absolutely no warranty. The author of this plugin is not responsible for any potential damage to equipment or lost imaging time. Use at your own risk.
+
+## Getting Started
+
+### **Create a Project**
+1. Create a directory named `DynamicSequencerProjects` under the NINA application folder, usually `C:\Users\USER_NAME\AppData\Local\NINA`.
+2. Create a JSON file in the `DynamicSequencerProjects` directory, it can have any name.
+3. Edit the JSON file with the items from the following table, **all items are mandatory**:
+> **WARNING** There are currently no checks for valid project JSON files built-in. All JSON files within the `DynamicSequencerProjects` directory are loaded by the plugin and assumed to be valid. No warnings may be generated and unexpected behavior may result from an invalid JSON file.
+
+| Property | Type | Description | Example |
+| --- | --- | --- | --- |
+| name | string | Name of the project | `"M31"` |
+| active | bool | Project is active when `true`. | `true` |
+| priority | int | Project priority, lower number is higher priority. | `0` |
+| minimumAltitude | double | Minimum altitude (in degrees) of a target for it to be considered. Set to `0` to disable. | `0` |
+| horizonOffset | double | Minimum altitude (in degress) above the custom horizon  of a target for it to be considered. Disabled if no custom horizon file exists. | `5` |
+| balanceTargets | bool | When set to `true`, the planner will prioritize the *least* completed target in a project, vice versa. This is helpful for balancing mosaic panels. Does nothing when only one target exists in the project. | `true` |
+| targets | list | | |
+| targets.name | string | Name of the target | `"Panel 1"` |
+| targets.rightAscension | double | RA of the target in degrees, JNOW | `11.0029` |
+| targets.declination | double | Dec of the target in degrees, JNOW | `41.3956` |
+| targets.rotation | double | Sky orientation of the target in degrees | `55` |
+| targets.balanceFilters | bool | When set to `true`, the planner will prioritize the *least* completed filter in the target, vice versa. Does nothing when only one filter exists. | `true` |
+| targets.exposures | list | | |
+| targets.exposures.filter | string | Name of filter, name must match the configured filter name on the filter wheel. | `"L"` |
+| targets.exposures.exposureTime | double | Exposure time in seconds for the chosen filter. | `600` |
+| targets.exposures.gain | int | Camera gain. | `100` |
+| targets.exposures.offset | int | Camera offset. | `30` |
+| targets.exposures.binning | int | Camera binning, 1 for 1x1, 2 for 2x2, etc. | `1` |
+| targets.exposures.moonSeparationAngle | double | Moon separation angle in degrees for the Lorentzian curve. Valid range `0-180`. | `140` |
+| targets.exposures.moonSeparationWidth | double | Moon separation width in days for the Lorentzian curve. Valid range `0-14`. | `10` |
+| targets.exposures.requiredAmount | int | Amount of frames required. | `60` |
+| targets.exposures.acquiredAmount | int | Amount of frames taken. This value is automatically updated by the plugin as more frames are taken. | `0` |
+
+A valid project JSON file may look something like this:
+```json
+{
+	"name": "M31",
+	"active": true,
+	"priority": 0,
+	"minimumAltitude": 0,
+	"horizonOffset": 5,
+	"balanceTargets": true,
+	"targets": [
+		{
+			"name": "Panel 1",
+			"rightAscension": 11.0029,
+			"declination": 41.3956,
+			"rotation": 55,
+			"balanceFilters": true,
+			"exposures": [
+				{
+					"filter": "L",
+					"exposureTime": 600,
+					"gain": 100,
+					"offset": 30,
+					"binning": 1,
+					"moonSeparationAngle": 140,
+					"moonSeparationWidth": 10,
+					"requiredAmount": 60,
+					"acquiredAmount": 0
+				},
+				{
+					"filter": "R",
+					"exposureTime": 600,
+					"gain": 100,
+					"offset": 30,
+					"binning": 1,
+					"moonSeparationAngle": 140,
+					"moonSeparationWidth": 10,
+					"requiredAmount": 20,
+					"acquiredAmount": 0
+				},
+				{
+					"filter": "G",
+					"exposureTime": 600,
+					"gain": 100,
+					"offset": 30,
+					"binning": 1,
+					"moonSeparationAngle": 140,
+					"moonSeparationWidth": 10,
+					"requiredAmount": 20,
+					"acquiredAmount": 0
+				},
+				{
+					"filter": "B",
+					"exposureTime": 600,
+					"gain": 100,
+					"offset": 30,
+					"binning": 1,
+					"moonSeparationAngle": 140,
+					"moonSeparationWidth": 10,
+					"requiredAmount": 20,
+					"acquiredAmount": 0
+				},
+				{
+					"filter": "Ha",
+					"exposureTime": 1200,
+					"gain": 100,
+					"offset": 30,
+					"binning": 1,
+					"moonSeparationAngle": 120,
+					"moonSeparationWidth": 10,
+					"requiredAmount": 30,
+					"acquiredAmount": 0
+				}
+			]
+		}
+	]
+}
+```
+### **Configure the Advanced Sequencer**
+There are currently 6 sequencer instructions/conditions. All of which can be identified by a name which starts with `DS:`. All the sequencer instructions and conditions from this plugin can be used in the same way as any other instruction from NINA.
+
+#### `DS: Center and Rotate`
+Slew, centers, and rotates to the optimal target. Current project and current target is saved in memory. The planning engine is "sticky", it will always prioritize the current project and current target if they are incomplete and available. This prevents the planner from bouncing back and forth between two or more targets, wasting valuable time. Will do nothing if the current target did not change.
+
+#### `DS: Reset Memory`
+Clears memory of current project and current target. The planning engine will reselect the optimal target with no "stickiness" during the next run. This should be run at the end of every night. May be run more frequently if shooting mosaics.
+
+#### `DS: Take Exposure`
+Takes one exposure in accordance to the exposure plan selected by the planning engine. Increments the `acquiredAmount` field after successful completion.
+
+#### `DS: Switch Filter`
+Switches filter in accordance to the exposure plan selected by the planning engine.
+
+#### `DS: Wait Until Target Available`
+Waits indefinitely until at least one target is returned from the planning engine. Note: the planning engine does not filter for sun altitude, so this should be used along with `Wait if Sun Altitude` or `Wait for Time`.
+
+#### `DS: Loop While Target Available`
+Loops indefinitely while at least one target is returned from the planning engine. Note: the planning engine does not filter for sun altitude, so this should be used along with `Loop Until Sun Altitude` or `Loop Until Time`.
+
+An example sequence:
+![ExampleSequence](resources/ExampleSequence.png)
