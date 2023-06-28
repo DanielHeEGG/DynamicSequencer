@@ -110,13 +110,10 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
                 throw new SequenceItemSkippedException("Skipping DynamicCenterAndRotate - No valid exposure");
             }
 
-            if (project == DynamicSequencer.previousProject && target == DynamicSequencer.previousTarget)
+            if (DynamicSequencer.previousProject != null && DynamicSequencer.previousTarget != null && project.name == DynamicSequencer.previousProject.name && target.name == DynamicSequencer.previousTarget.name)
             {
                 return;
             }
-
-            DynamicSequencer.previousProject = project;
-            DynamicSequencer.previousTarget = target;
 
             if (_telescopeMediator.GetInfo().AtPark)
             {
@@ -210,6 +207,9 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
             }
             finally
             {
+                DynamicSequencer.previousProject = project;
+                DynamicSequencer.previousTarget = target;
+
                 if (stoppedGuiding)
                 {
                     try
