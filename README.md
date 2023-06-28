@@ -149,3 +149,15 @@ Loops indefinitely while at least one target is returned from the planning engin
 
 An example sequence:
 ![ExampleSequence](resources/ExampleSequence.png)
+
+## Changelog
+
+### v0.1.0.0
+- Added planning engine
+- Added moon separation filter
+- Added `DS: Center and Rotate`
+- Added `DS: Reset Memory`
+- Added `DS: Take Exposure`
+- Added `DS: Switch Filter`
+- Added `DS: Wait Until Target Available`
+- Added `DS: Loop While Target Available`
