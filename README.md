@@ -155,6 +155,9 @@ An example sequence:
 
 ## Changelog
 
+### v0.2.0.0
+- Added `DS: Loop While Project Available`
+
 ### v0.1.0.0
 - Added planning engine
 - Added moon separation filter
