@@ -57,6 +57,11 @@ namespace DanielHeEGG.NINA.DynamicSequencer
 
             foreach (PProject project in _projects)
             {
+                if (project.completion >= 1.0f)
+                {
+                    project.active = false;
+                }
+
                 if (!project.active)
                 {
                     project.valid = false;

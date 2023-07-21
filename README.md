@@ -147,6 +147,9 @@ Waits indefinitely until at least one target is returned from the planning engin
 #### `DS: Loop While Target Available`
 Loops indefinitely while at least one target is returned from the planning engine. Note: the planning engine does not filter for sun altitude, so this should be used along with `Loop Until Sun Altitude` or `Loop Until Time`.
 
+#### `DS: Loop While Project Available`
+Loops indefinitely while at least one project is active. Completed projects are automatically set to inactive.
+
 An example sequence:
 ![ExampleSequence](resources/ExampleSequence.png)
 

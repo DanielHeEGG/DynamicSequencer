@@ -279,6 +279,7 @@
     <Compile Include="SequencerItems\DynamicCenterAndRotate.cs" />
     <Compile Include="SequencerItems\DynamicExposure.cs" />
     <Compile Include="SequencerItems\DynamicFilter.cs" />
+    <Compile Include="SequencerItems\ProjectAvailableCondition.cs" />
     <Compile Include="SequencerItems\ResetMemory.cs" />
     <Compile Include="SequencerItems\TargetAvailableCondition.cs" />
     <Compile Include="SequencerItems\WaitForTargetAvailable.cs" />
