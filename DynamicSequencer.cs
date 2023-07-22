@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.Composition;
 
+using DanielHeEGG.NINA.DynamicSequencer.PlannerEngine;
+
 using NINA.Core.Utility;
 using NINA.Plugin;
 using NINA.Plugin.Interfaces;

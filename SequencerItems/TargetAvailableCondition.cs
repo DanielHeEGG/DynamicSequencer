@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.Composition;
 
+using DanielHeEGG.NINA.DynamicSequencer.PlannerEngine;
+
 using NINA.Profile.Interfaces;
 using NINA.Sequencer.Conditions;
 using NINA.Sequencer.SequenceItem;

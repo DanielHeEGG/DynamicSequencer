@@ -269,7 +269,10 @@
   <ItemGroup>
     <Compile Include="AstrometryUtils.cs" />
     <Compile Include="DynamicSequencer.cs" />
-    <Compile Include="Planner.cs" />
+    <Compile Include="PlannerEngine\PExposure.cs" />
+    <Compile Include="PlannerEngine\Planner.cs" />
+    <Compile Include="PlannerEngine\PProject.cs" />
+    <Compile Include="PlannerEngine\PTarget.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>

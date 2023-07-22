@@ -3,6 +3,8 @@ using System.ComponentModel.Composition;
 using System.Threading;
 using System.Threading.Tasks;
 
+using DanielHeEGG.NINA.DynamicSequencer.PlannerEngine;
+
 using NINA.Astrometry;
 using NINA.Core.Enum;
 using NINA.Core.Locale;
