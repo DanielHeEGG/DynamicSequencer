@@ -18,6 +18,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
         public double minimumAltitude { get; set; }
         public double horizonOffset { get; set; }
         public bool balanceTargets { get; set; }
+        public Grader imageGrader { get; set; }
         public List<PTarget> targets { get; set; }
 
         [JsonIgnore]

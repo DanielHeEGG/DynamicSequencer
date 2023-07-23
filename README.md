@@ -32,6 +32,9 @@ If you're looking for a more straightforward and plug-and-play solution, Target 
 | minimumAltitude | double | Minimum altitude (in degrees) of a target for it to be considered. Set to `0` to disable. | `0` |
 | horizonOffset | double | Minimum altitude (in degress) above the custom horizon  of a target for it to be considered. Disabled if no custom horizon file exists. | `5` |
 | balanceTargets | bool | When set to `true`, the planner will prioritize the *least* completed target in a project, vice versa. This is helpful for balancing mosaic panels. Does nothing when only one target exists in the project. | `true` |
+| imageGrader.minStars | int | Minimum amount of stars for a frame to pass. | `100` |
+| imageGrader.maxHFR | double | Maximum average star HFR (in pixels) for a frame to pass. | `2.0` |
+| imageGrader.maxGuideError | double | Maximum guiding RMS error (in pixels) for a frame to pass. | `1.0` |
 | targets | list | | |
 | targets.name | string | Name of the target | `"Panel 1"` |
 | targets.rightAscension | double | RA of the target in degrees, JNOW | `11.0029` |
@@ -47,7 +50,7 @@ If you're looking for a more straightforward and plug-and-play solution, Target 
 | targets.exposures.moonSeparationAngle | double | Moon separation angle in degrees for the Lorentzian curve. Valid range `0-180`. | `140` |
 | targets.exposures.moonSeparationWidth | double | Moon separation width in days for the Lorentzian curve. Valid range `0-14`. | `10` |
 | targets.exposures.requiredAmount | int | Amount of frames required. | `60` |
-| targets.exposures.acquiredAmount | int | Amount of frames taken. This value is automatically updated by the plugin as more frames are taken. | `0` |
+| targets.exposures.acceptedAmount | int | Amount of frames taken. This value is automatically updated by the plugin as more frames are taken. | `0` |
 
 A valid project JSON file may look something like this:
 ```json
@@ -58,6 +61,11 @@ A valid project JSON file may look something like this:
 	"minimumAltitude": 0,
 	"horizonOffset": 5,
 	"balanceTargets": true,
+	"imageGrader": {
+		"minStars": 100,
+		"maxHFR": 2.0,
+		"maxGuideError": 1.0
+	},
 	"targets": [
 		{
 			"name": "Panel 1",
@@ -75,7 +83,7 @@ A valid project JSON file may look something like this:
 					"moonSeparationAngle": 140,
 					"moonSeparationWidth": 10,
 					"requiredAmount": 60,
-					"acquiredAmount": 0
+					"acceptedAmount": 0
 				},
 				{
 					"filter": "R",
@@ -86,7 +94,7 @@ A valid project JSON file may look something like this:
 					"moonSeparationAngle": 140,
 					"moonSeparationWidth": 10,
 					"requiredAmount": 20,
-					"acquiredAmount": 0
+					"acceptedAmount": 0
 				},
 				{
 					"filter": "G",
@@ -97,7 +105,7 @@ A valid project JSON file may look something like this:
 					"moonSeparationAngle": 140,
 					"moonSeparationWidth": 10,
 					"requiredAmount": 20,
-					"acquiredAmount": 0
+					"acceptedAmount": 0
 				},
 				{
 					"filter": "B",
@@ -108,7 +116,7 @@ A valid project JSON file may look something like this:
 					"moonSeparationAngle": 140,
 					"moonSeparationWidth": 10,
 					"requiredAmount": 20,
-					"acquiredAmount": 0
+					"acceptedAmount": 0
 				},
 				{
 					"filter": "Ha",
@@ -119,15 +127,20 @@ A valid project JSON file may look something like this:
 					"moonSeparationAngle": 120,
 					"moonSeparationWidth": 10,
 					"requiredAmount": 30,
-					"acquiredAmount": 0
+					"acceptedAmount": 0
 				}
 			]
 		}
 	]
 }
 ```
+### **Notes on Image Grading**
+* Frames that are rejected do not increment the `acceptedAmount` field.
+* There is no option to turn off image grading, it can be effectively disabled by setting the grading criteria such as `"minStars": 0`.
+* Frames that are rejected are not deleted. Instead, the `Sequence Title` attribute of the frame metadata is edited to have `- REJECTED` at the end. If NINA is configured to include the `$$SEQUENCETITLE$$` attribute in the image file pattern setting, the image's name will change accordingly. For example, if a frame is usually saved as `M31/Panel 1/Ha_2000_01_01.fits`, a rejected frame will be `M31 - REJECTED/Panel 1/Ha_2000_01_01.fits`.
+
 ### **Configure the Advanced Sequencer**
-There are currently 6 sequencer instructions/conditions. All of which can be identified by a name which starts with `DS:`. All the sequencer instructions and conditions from this plugin can be used in the same way as any other instruction from NINA.
+All Dynamic Sequencer items can be identified by a name which starts with `DS:`. All the sequencer instructions and conditions from this plugin can be used in the same way as any other instruction from NINA.
 
 #### `DS: Center and Rotate`
 Slew, centers, and rotates to the optimal target. Current project and current target is saved in memory. The planning engine is "sticky", it will always prioritize the current project and current target if they are incomplete and available. This prevents the planner from bouncing back and forth between two or more targets, wasting valuable time. Will do nothing if the current target did not change.
@@ -136,7 +149,7 @@ Slew, centers, and rotates to the optimal target. Current project and current ta
 Clears memory of current project and current target. The planning engine will reselect the optimal target with no "stickiness" during the next run. This should be run at the end of every night. May be run more frequently if shooting mosaics.
 
 #### `DS: Take Exposure`
-Takes one exposure in accordance to the exposure plan selected by the planning engine. Increments the `acquiredAmount` field after successful completion.
+Takes one exposure in accordance to the exposure plan selected by the planning engine.
 
 #### `DS: Switch Filter`
 Switches filter in accordance to the exposure plan selected by the planning engine.

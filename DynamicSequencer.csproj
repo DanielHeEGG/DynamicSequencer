@@ -269,6 +269,7 @@
   <ItemGroup>
     <Compile Include="AstrometryUtils.cs" />
     <Compile Include="DynamicSequencer.cs" />
+	  <Compile Include="PlannerEngine\Grader.cs" />
     <Compile Include="PlannerEngine\PExposure.cs" />
     <Compile Include="PlannerEngine\Planner.cs" />
     <Compile Include="PlannerEngine\PProject.cs" />

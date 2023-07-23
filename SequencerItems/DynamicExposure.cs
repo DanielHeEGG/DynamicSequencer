@@ -94,27 +94,32 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
                 TotalExposureCount = 1
             };
 
-            var imageParams = new PrepareImageParameters(true, true);
-
             var exposureData = await _imagingMediator.CaptureImage(capture, token, progress);
 
             var imageData = await exposureData.ToImageData(progress, token);
 
-            var prepareTask = _imagingMediator.PrepareImage(imageData, imageParams, token);
+            var renderedImage = await _imagingMediator.PrepareImage(imageData, new PrepareImageParameters(true, true), token);
 
             imageData.MetaData.Target.Name = target.name;
             imageData.MetaData.Target.Coordinates = target.coordinates;
             imageData.MetaData.Target.Rotation = target.rotation;
             imageData.MetaData.Sequence.Title = project.name;
 
-            await _imageSaveMediator.Enqueue(imageData, prepareTask, progress, token);
+            if (project.imageGrader.GradeImage(renderedImage.RawImageData))
+            {
+                exposure.acceptedAmount++;
+                planner.WriteFiles();
+            }
+            else
+            {
+                imageData.MetaData.Sequence.Title += " - REJECTED";
+            }
+
+            await _imageSaveMediator.Enqueue(imageData, Task.FromResult(renderedImage), progress, token);
 
             var imageStats = await imageData.Statistics;
 
             _imageHistoryVM.Add(imageData.MetaData.Image.Id, imageStats, CaptureSequence.ImageTypes.LIGHT);
-
-            exposure.acceptedAmount++;
-            planner.WriteFiles();
         }
     }
 }
