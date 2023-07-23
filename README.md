@@ -168,6 +168,10 @@ An example sequence:
 
 ## Changelog
 
+### v0.3.0.0
+- Added image grader
+- Fixed meridian flip timing issue
+
 ### v0.2.0.0
 - Added `DS: Loop While Project Available`
 
