@@ -121,5 +121,31 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
 
             _imageHistoryVM.Add(imageData.MetaData.Image.Id, imageStats, CaptureSequence.ImageTypes.LIGHT);
         }
+
+        public override TimeSpan GetEstimatedDuration()
+        {
+            var planner = new Planner();
+            planner.Filter(_profileService);
+            var project = planner.Best();
+            if (project == null)
+            {
+                Notification.ShowWarning("Skipping DynamicExposure - No valid project");
+                throw new SequenceItemSkippedException("Skipping DynamicExposure - No valid project");
+            }
+            var target = project.Best();
+            if (target == null)
+            {
+                Notification.ShowWarning("Skipping DynamicExposure - No valid target");
+                throw new SequenceItemSkippedException("Skipping DynamicExposure - No valid target");
+            }
+            var exposure = target.Best();
+            if (exposure == null)
+            {
+                Notification.ShowWarning("Skipping DynamicExposure - No valid exposure");
+                throw new SequenceItemSkippedException("Skipping DynamicExposure - No valid exposure");
+            }
+
+            return TimeSpan.FromSeconds(exposure.exposureTime);
+        }
     }
 }
