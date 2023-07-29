@@ -167,6 +167,8 @@ An example sequence:
 ![ExampleSequence](resources/ExampleSequence.png)
 
 ## Changelog
+### v0.3.1.0
+- Fixed AF trigger issue with DynamicExposure
 
 ### v0.3.0.0
 - Added image grader
