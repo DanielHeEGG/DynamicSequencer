@@ -6,11 +6,13 @@ using System.Threading.Tasks;
 using DanielHeEGG.NINA.DynamicSequencer.PlannerEngine;
 
 using NINA.Core.Model;
+using NINA.Core.Model.Equipment;
 using NINA.Core.Utility;
 using NINA.Core.Utility.Notification;
 using NINA.Equipment.Interfaces.Mediator;
 using NINA.Equipment.Model;
 using NINA.Profile.Interfaces;
+using NINA.Sequencer.Interfaces;
 using NINA.Sequencer.SequenceItem;
 using NINA.WPF.Base.Interfaces.Mediator;
 using NINA.WPF.Base.Interfaces.ViewModel;
@@ -22,13 +24,20 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
     [ExportMetadata("Icon", "CameraSVG")]
     [ExportMetadata("Category", "Lbl_SequenceCategory_Camera")]
     [Export(typeof(ISequenceItem))]
-    public class DynamicExposure : SequenceItem
+    public class DynamicExposure : SequenceItem, IExposureItem
     {
         private IProfileService _profileService;
         private ICameraMediator _cameraMediator;
         private IImagingMediator _imagingMediator;
         private IImageSaveMediator _imageSaveMediator;
         private IImageHistoryVM _imageHistoryVM;
+
+        // To satisfy IExposureItem interface requirements, DO NOT USE
+        public double ExposureTime { get; }
+        public int Gain { get; }
+        public int Offset { get; }
+        public string ImageType { get; }
+        public BinningMode Binning { get; }
 
         [ImportingConstructor]
         public DynamicExposure(
