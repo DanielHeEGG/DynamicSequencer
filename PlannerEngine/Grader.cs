@@ -19,5 +19,10 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
             if (imageData.MetaData.Image.RecordedRMS.Total > maxGuideError) return false;
             return true;
         }
+
+        public override string ToString()
+        {
+            return string.Join("_", minStars, maxHFR, maxGuideError);
+        }
     }
 }

@@ -31,5 +31,10 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
         {
             get { return requiredAmount == 0 ? 1 : (double)acceptedAmount / requiredAmount; }
         }
+
+        public override string ToString()
+        {
+            return string.Join("_", filter, exposureTime, gain, offset, binning, moonSeparationAngle, moonSeparationWidth, requiredAmount);
+        }
     }
 }

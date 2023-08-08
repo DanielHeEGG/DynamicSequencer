@@ -115,9 +115,12 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
                 return null;
             }
 
-            if (DynamicSequencer.previousTarget != null && targets.Contains(DynamicSequencer.previousTarget) && DynamicSequencer.previousTarget.valid)
+            foreach (PTarget target in targets)
             {
-                return DynamicSequencer.previousTarget;
+                if (target.valid && target.ToString() == DynamicSequencer.previousTarget)
+                {
+                    return target;
+                }
             }
 
             targets.Sort(delegate (PTarget x, PTarget y)
@@ -127,6 +130,11 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
             });
 
             return targets[0].valid ? targets[0] : null;
+        }
+
+        public override string ToString()
+        {
+            return string.Join("_", name, active, priority, minimumAltitude, horizonOffset, balanceTargets, imageGrader);
         }
     }
 }

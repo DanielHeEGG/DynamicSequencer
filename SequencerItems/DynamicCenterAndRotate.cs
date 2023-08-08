@@ -112,7 +112,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
                 throw new SequenceItemSkippedException("Skipping DynamicCenterAndRotate - No valid exposure");
             }
 
-            if (DynamicSequencer.previousProject != null && DynamicSequencer.previousTarget != null && project.name == DynamicSequencer.previousProject.name && target.name == DynamicSequencer.previousTarget.name)
+            if (project.ToString() == DynamicSequencer.previousProject && target.ToString() == DynamicSequencer.previousTarget)
             {
                 return;
             }
@@ -209,8 +209,8 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
             }
             finally
             {
-                DynamicSequencer.previousProject = project;
-                DynamicSequencer.previousTarget = target;
+                DynamicSequencer.previousProject = project.ToString();
+                DynamicSequencer.previousTarget = target.ToString();
 
                 if (stoppedGuiding)
                 {

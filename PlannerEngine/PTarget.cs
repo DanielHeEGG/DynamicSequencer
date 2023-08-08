@@ -115,5 +115,10 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
 
             return exposures[0].valid ? exposures[0] : null;
         }
+
+        public override string ToString()
+        {
+            return string.Join("_", name, rightAscension, declination, rotation, balanceFilters);
+        }
     }
 }

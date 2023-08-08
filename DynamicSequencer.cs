@@ -14,8 +14,8 @@ namespace DanielHeEGG.NINA.DynamicSequencer
     [Export(typeof(IPluginManifest))]
     public class DynamicSequencer : PluginBase
     {
-        public static PProject previousProject = null;
-        public static PTarget previousTarget = null;
+        public static string previousProject = "";
+        public static string previousTarget = "";
 
         private readonly IProfileService _profileService;
 

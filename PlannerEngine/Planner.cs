@@ -77,9 +77,12 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
                 return null;
             }
 
-            if (DynamicSequencer.previousProject != null && _projects.Contains(DynamicSequencer.previousProject) && DynamicSequencer.previousProject.valid)
+            foreach (PProject project in _projects)
             {
-                return DynamicSequencer.previousProject;
+                if (project.valid && project.ToString() == DynamicSequencer.previousProject)
+                {
+                    return project;
+                }
             }
 
             _projects.Sort(delegate (PProject x, PProject y)
