@@ -172,6 +172,10 @@ An example sequence:
 ![ExampleSequence](resources/ExampleSequence.png)
 
 ## Changelog
+### v0.4.0.0
+- Added `DS: Dither`
+- Projects, targets, and exposures now have unique ids
+
 ### v0.3.1.0
 - Fixed AF trigger issue with DynamicExposure
 
