@@ -29,6 +29,7 @@ If you're looking for a more straightforward and plug-and-play solution, Target 
 | name | string | Name of the project | `"M31"` |
 | active | bool | Project is active when `true`. | `true` |
 | priority | int | Project priority, lower number is higher priority. | `0` |
+| ditherEvery | int | Amount of frames to take of each filter before dithering | `1` |
 | minimumAltitude | double | Minimum altitude (in degrees) of a target for it to be considered. Set to `0` to disable. | `0` |
 | horizonOffset | double | Minimum altitude (in degress) above the custom horizon  of a target for it to be considered. Disabled if no custom horizon file exists. | `5` |
 | balanceTargets | bool | When set to `true`, the planner will prioritize the *least* completed target in a project, vice versa. This is helpful for balancing mosaic panels. Does nothing when only one target exists in the project. | `true` |
@@ -58,6 +59,7 @@ A valid project JSON file may look something like this:
 	"name": "M31",
 	"active": true,
 	"priority": 0,
+	"ditherEvery": 1,
 	"minimumAltitude": 0,
 	"horizonOffset": 5,
 	"balanceTargets": true,
@@ -153,6 +155,9 @@ Takes one exposure in accordance to the exposure plan selected by the planning e
 
 #### `DS: Switch Filter`
 Switches filter in accordance to the exposure plan selected by the planning engine.
+
+#### `DS: Dither`
+Sends a dither command to the guiding software when conditions are met. Configurable with the `ditherEvery` setting. This instruction will only send a dither command if the number of frames shot in *any filter* since the last dither/slew exceeds the setting. For example, when `ditherEvery = 1`, a series of frames may look something like this: `SHO'SHO'SHO` or `L'L'LRGB'L'L'LRGB`. Or when `ditherEvery = 2` it may look like: `SHOSHO'SHOSHO` or `LL'LRGBL'LLRGB'LL`.
 
 #### `DS: Wait Until Target Available`
 Waits indefinitely until at least one target is returned from the planning engine. Note: the planning engine does not filter for sun altitude, so this should be used along with `Wait if Sun Altitude` or `Wait for Time`.

@@ -211,6 +211,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
             {
                 DynamicSequencer.previousProject = project.ToString();
                 DynamicSequencer.previousTarget = target.ToString();
+                DynamicSequencer.ditherLog.Clear();
 
                 if (stoppedGuiding)
                 {

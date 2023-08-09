@@ -281,6 +281,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="SequencerItems\DynamicCenterAndRotate.cs" />
+    <Compile Include="SequencerItems\DynamicDither.cs" />
     <Compile Include="SequencerItems\DynamicExposure.cs" />
     <Compile Include="SequencerItems\DynamicFilter.cs" />
     <Compile Include="SequencerItems\ProjectAvailableCondition.cs" />

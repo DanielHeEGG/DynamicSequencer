@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.Composition;
+﻿using System.Collections.Generic;
+using System.ComponentModel.Composition;
 
 using DanielHeEGG.NINA.DynamicSequencer.PlannerEngine;
 
@@ -16,6 +17,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer
     {
         public static string previousProject = "";
         public static string previousTarget = "";
+        public static Dictionary<string, int> ditherLog = new Dictionary<string, int>();
 
         private readonly IProfileService _profileService;
 

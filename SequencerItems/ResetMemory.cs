@@ -31,6 +31,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
         {
             DynamicSequencer.previousProject = "";
             DynamicSequencer.previousTarget = "";
+            DynamicSequencer.ditherLog.Clear();
             return Task.CompletedTask;
         }
 

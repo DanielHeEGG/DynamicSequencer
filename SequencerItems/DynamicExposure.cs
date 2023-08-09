@@ -118,6 +118,9 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
             {
                 exposure.acceptedAmount++;
                 planner.WriteFiles();
+
+                if (DynamicSequencer.ditherLog.ContainsKey(exposure.ToString())) DynamicSequencer.ditherLog[exposure.ToString()]++;
+                else DynamicSequencer.ditherLog.Add(exposure.ToString(), 1);
             }
             else
             {
