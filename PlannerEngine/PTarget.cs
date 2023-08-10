@@ -14,7 +14,8 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
         public string name { get; set; }
         public double rightAscension { get; set; }
         public double declination { get; set; }
-        public double rotation { get; set; }
+        public double skyRotation { get; set; }
+        public double mechanicalRotation { get; set; }
         public bool balanceFilters { get; set; }
         public List<PExposure> exposures { get; set; }
 
@@ -118,7 +119,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
 
         public override string ToString()
         {
-            return string.Join("_", name, rightAscension, declination, rotation, balanceFilters);
+            return string.Join("_", name, rightAscension, declination, skyRotation, mechanicalRotation, balanceFilters);
         }
     }
 }

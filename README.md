@@ -33,6 +33,8 @@ If you're looking for a more straightforward and plug-and-play solution, Target 
 | minimumAltitude | double | Minimum altitude (in degrees) of a target for it to be considered. Set to `0` to disable. | `0` |
 | horizonOffset | double | Minimum altitude (in degress) above the custom horizon  of a target for it to be considered. Disabled if no custom horizon file exists. | `5` |
 | balanceTargets | bool | When set to `true`, the planner will prioritize the *least* completed target in a project, vice versa. This is helpful for balancing mosaic panels. Does nothing when only one target exists in the project. | `true` |
+| centerTargets | bool | When set to `false`, `DS: Center and Rotate` will skip centering and will only slew then rotate. This may save some time if you have an accurate pointing model. | `true` |
+| useMechanicalRotation | bool | When set to `true`, `DS: Center and Rotate` will save the mechanical rotator position and reuse it instead of platesolving and rotating every time. This saves some time and helps with repeatable flat frames. | `true` |
 | imageGrader.minStars | int | Minimum amount of stars for a frame to pass. | `100` |
 | imageGrader.maxHFR | double | Maximum average star HFR (in pixels) for a frame to pass. | `2.0` |
 | imageGrader.maxGuideError | double | Maximum guiding RMS error (in pixels) for a frame to pass. | `1.0` |
@@ -40,7 +42,8 @@ If you're looking for a more straightforward and plug-and-play solution, Target 
 | targets.name | string | Name of the target | `"Panel 1"` |
 | targets.rightAscension | double | RA of the target in degrees, JNOW | `11.0029` |
 | targets.declination | double | Dec of the target in degrees, JNOW | `41.3956` |
-| targets.rotation | double | Sky orientation of the target in degrees | `55` |
+| targets.skyRotation | double | Sky orientation of the target in degrees. This is ignored when `useMechanicalRotation = true` and when there is a valid mechanical rotation value in `targets.mechanicalRotation` | `55` |
+| targets.mechanicalRotation | double | Mechanical orientation of the rotator in degrees. When `useMechanicalRotation = true` and set to a value less than zero, the planner will attempt to figure out this value when this target is first selected and will save it to the json file for future use. All subsequent slews and rotates on this target will use this value. If there is a major change in the optical train that renders this value inaccurate, it may be reset by simply changing the value to a number below zero again. | `-1` |
 | targets.balanceFilters | bool | When set to `true`, the planner will prioritize the *least* completed filter in the target, vice versa. Does nothing when only one filter exists. | `true` |
 | targets.exposures | list | | |
 | targets.exposures.filter | string | Name of filter, name must match the configured filter name on the filter wheel. | `"L"` |
@@ -63,6 +66,8 @@ A valid project JSON file may look something like this:
 	"minimumAltitude": 0,
 	"horizonOffset": 5,
 	"balanceTargets": true,
+	"centerTargets": true,
+	"useMechanicalRotation": true,
 	"imageGrader": {
 		"minStars": 100,
 		"maxHFR": 2.0,
@@ -73,7 +78,8 @@ A valid project JSON file may look something like this:
 			"name": "Panel 1",
 			"rightAscension": 11.0029,
 			"declination": 41.3956,
-			"rotation": 55,
+			"skyRotation": 55,
+			"mechanicalRotation": -1,
 			"balanceFilters": true,
 			"exposures": [
 				{
@@ -145,7 +151,7 @@ A valid project JSON file may look something like this:
 All Dynamic Sequencer items can be identified by a name which starts with `DS:`. All the sequencer instructions and conditions from this plugin can be used in the same way as any other instruction from NINA.
 
 #### `DS: Center and Rotate`
-Slew, centers, and rotates to the optimal target. Current project and current target is saved in memory. The planning engine is "sticky", it will always prioritize the current project and current target if they are incomplete and available. This prevents the planner from bouncing back and forth between two or more targets, wasting valuable time. Will do nothing if the current target did not change.
+Slew, centers, and rotates to the optimal target. Current project and current target is saved in memory. The planning engine is "sticky", it will always prioritize the current project and current target if they are incomplete and available. This prevents the planner from bouncing back and forth between two or more targets, wasting valuable time. Will do nothing if the current target did not change. Behavior similar to vanilla NINA's `Slew, Center, and Rotate` can be achieved by setting `centerTargets = true` and `useMechanicalRotation = false`.
 
 #### `DS: Reset Memory`
 Clears memory of current project and current target. The planning engine will reselect the optimal target with no "stickiness" during the next run. This should be run at the end of every night. May be run more frequently if shooting mosaics.

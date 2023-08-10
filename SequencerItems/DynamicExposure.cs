@@ -111,7 +111,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
 
             imageData.MetaData.Target.Name = target.name;
             imageData.MetaData.Target.Coordinates = target.coordinates;
-            imageData.MetaData.Target.Rotation = target.rotation;
+            imageData.MetaData.Target.Rotation = target.skyRotation;
             imageData.MetaData.Sequence.Title = project.name;
 
             if (project.imageGrader.GradeImage(renderedImage.RawImageData))

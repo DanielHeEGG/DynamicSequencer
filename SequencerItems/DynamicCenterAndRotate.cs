@@ -148,63 +148,79 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
                 }
                 progress?.Report(new ApplicationStatus() { Status = string.Empty });
 
-                var targetRotation = (float)target.rotation;
-
-                /* Loop until the rotation is within tolerances*/
-                do
+                if ((!project.useMechanicalRotation) || (target.mechanicalRotation < 0))
                 {
-                    var solveResult = await Solve(progress, token, target.coordinates);
-                    if (!solveResult.Success)
+                    var targetRotation = (float)target.skyRotation;
+
+                    /* Loop until the rotation is within tolerances*/
+                    do
                     {
-                        throw new SequenceEntityFailedException(Loc.Instance["LblPlatesolveFailed"]);
-                    }
-
-                    var orientation = (float)solveResult.Orientation;
-                    _rotatorMediator.Sync(orientation);
-
-                    var prevTargetRotation = targetRotation;
-                    targetRotation = _rotatorMediator.GetTargetPosition(prevTargetRotation);
-                    if (Math.Abs(targetRotation - prevTargetRotation) > 0.1)
-                    {
-                        Logger.Info($"Rotator target position {target.rotation} adjusted to {targetRotation} to be within the allowed mechanical range");
-                        Notification.ShowInformation(string.Format(Loc.Instance["LblRotatorRangeAdjusted"], targetRotation));
-                    }
-
-                    rotationDistance = targetRotation - orientation;
-                    if (_profileService.ActiveProfile.RotatorSettings.RangeType == RotatorRangeTypeEnum.FULL)
-                    {
-                        // If the full rotation range is allowed, then consider the 180-degree rotated orientation as well in case it is closer
-                        var movement = AstroUtil.EuclidianModulus(rotationDistance, 180);
-                        var movement2 = movement - 180;
-
-                        if (movement < Math.Abs(movement2))
+                        var solveResult = await Solve(progress, token, target.coordinates);
+                        if (!solveResult.Success)
                         {
-                            rotationDistance = movement;
+                            throw new SequenceEntityFailedException(Loc.Instance["LblPlatesolveFailed"]);
                         }
-                        else
-                        {
-                            targetRotation = AstroUtil.EuclidianModulus(targetRotation + 180, 360);
-                            Logger.Info($"Changing rotation target to {targetRotation} instead since it is closer to the current position");
-                            rotationDistance = movement2;
-                        }
-                    }
 
-                    if (!Angle.ByDegree(rotationDistance).Equals(Angle.Zero, Angle.ByDegree(_profileService.ActiveProfile.PlateSolveSettings.RotationTolerance)))
+                        var orientation = (float)solveResult.Orientation;
+                        _rotatorMediator.Sync(orientation);
+
+                        var prevTargetRotation = targetRotation;
+                        targetRotation = _rotatorMediator.GetTargetPosition(prevTargetRotation);
+                        if (Math.Abs(targetRotation - prevTargetRotation) > 0.1)
+                        {
+                            Logger.Info($"Rotator target position {target.skyRotation} adjusted to {targetRotation} to be within the allowed mechanical range");
+                            Notification.ShowInformation(string.Format(Loc.Instance["LblRotatorRangeAdjusted"], targetRotation));
+                        }
+
+                        rotationDistance = targetRotation - orientation;
+                        if (_profileService.ActiveProfile.RotatorSettings.RangeType == RotatorRangeTypeEnum.FULL)
+                        {
+                            // If the full rotation range is allowed, then consider the 180-degree rotated orientation as well in case it is closer
+                            var movement = AstroUtil.EuclidianModulus(rotationDistance, 180);
+                            var movement2 = movement - 180;
+
+                            if (movement < Math.Abs(movement2))
+                            {
+                                rotationDistance = movement;
+                            }
+                            else
+                            {
+                                targetRotation = AstroUtil.EuclidianModulus(targetRotation + 180, 360);
+                                Logger.Info($"Changing rotation target to {targetRotation} instead since it is closer to the current position");
+                                rotationDistance = movement2;
+                            }
+                        }
+
+                        if (!Angle.ByDegree(rotationDistance).Equals(Angle.Zero, Angle.ByDegree(_profileService.ActiveProfile.PlateSolveSettings.RotationTolerance)))
+                        {
+                            Logger.Info($"Rotator not inside tolerance {_profileService.ActiveProfile.PlateSolveSettings.RotationTolerance} - Current {orientation}° / Target: {target.skyRotation}° - Moving rotator relatively by {rotationDistance}°");
+                            progress?.Report(new ApplicationStatus() { Status = Loc.Instance["LblRotating"] });
+                            await _rotatorMediator.MoveRelative(rotationDistance, token);
+                            progress?.Report(new ApplicationStatus() { Status = string.Empty });
+                            token.ThrowIfCancellationRequested();
+                        }
+                    } while (!Angle.ByDegree(rotationDistance).Equals(Angle.Zero, Angle.ByDegree(_profileService.ActiveProfile.PlateSolveSettings.RotationTolerance)));
+
+                    if (project.useMechanicalRotation)
                     {
-                        Logger.Info($"Rotator not inside tolerance {_profileService.ActiveProfile.PlateSolveSettings.RotationTolerance} - Current {orientation}° / Target: {target.rotation}° - Moving rotator relatively by {rotationDistance}°");
-                        progress?.Report(new ApplicationStatus() { Status = Loc.Instance["LblRotating"] });
-                        await _rotatorMediator.MoveRelative(rotationDistance, token);
-                        progress?.Report(new ApplicationStatus() { Status = string.Empty });
-                        token.ThrowIfCancellationRequested();
+                        target.mechanicalRotation = (double)_rotatorMediator.GetInfo().MechanicalPosition;
+                        planner.WriteFiles();
                     }
-                } while (!Angle.ByDegree(rotationDistance).Equals(Angle.Zero, Angle.ByDegree(_profileService.ActiveProfile.PlateSolveSettings.RotationTolerance)));
+                }
+                if (project.useMechanicalRotation && Math.Abs((double)_rotatorMediator.GetInfo().MechanicalPosition - target.mechanicalRotation) > 0.1)
+                {
+                    await _rotatorMediator.MoveMechanical((float)target.mechanicalRotation, token);
+                }
 
                 /* Once everything is in place do a centering of the object */
-                var centerResult = await DoCenter(progress, token, target.coordinates);
-
-                if (!centerResult.Success)
+                if (project.centerTargets)
                 {
-                    throw new Exception(Loc.Instance["LblPlatesolveFailed"]);
+                    var centerResult = await DoCenter(progress, token, target.coordinates);
+
+                    if (!centerResult.Success)
+                    {
+                        throw new Exception(Loc.Instance["LblPlatesolveFailed"]);
+                    }
                 }
             }
             finally

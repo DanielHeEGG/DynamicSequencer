@@ -19,6 +19,8 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
         public double minimumAltitude { get; set; }
         public double horizonOffset { get; set; }
         public bool balanceTargets { get; set; }
+        public bool centerTargets { get; set; }
+        public bool useMechanicalRotation { get; set; }
         public Grader imageGrader { get; set; }
         public List<PTarget> targets { get; set; }
 
@@ -135,7 +137,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
 
         public override string ToString()
         {
-            return string.Join("_", name, active, priority, ditherEvery, minimumAltitude, horizonOffset, balanceTargets, imageGrader);
+            return string.Join("_", name, active, priority, ditherEvery, minimumAltitude, horizonOffset, balanceTargets, centerTargets, useMechanicalRotation, imageGrader);
         }
     }
 }
