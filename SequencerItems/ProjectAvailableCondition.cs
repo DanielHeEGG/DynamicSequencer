@@ -18,9 +18,9 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
         public IProfileService _profileService;
 
         [ImportingConstructor]
-        public ProjectAvailableCondition(IProfileService profileSerivce)
+        public ProjectAvailableCondition(IProfileService profileService)
         {
-            _profileService = profileSerivce;
+            _profileService = profileService;
         }
         private ProjectAvailableCondition(ProjectAvailableCondition cloneMe) : this(cloneMe._profileService)
         {

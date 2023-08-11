@@ -25,9 +25,9 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
         private IFilterWheelMediator _filterWheelMediator;
 
         [ImportingConstructor]
-        public DynamicFilter(IProfileService profileservice, IFilterWheelMediator filterWheelMediator)
+        public DynamicFilter(IProfileService profileService, IFilterWheelMediator filterWheelMediator)
         {
-            _profileService = profileservice;
+            _profileService = profileService;
             _filterWheelMediator = filterWheelMediator;
         }
 

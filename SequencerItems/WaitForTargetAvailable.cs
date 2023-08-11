@@ -22,9 +22,9 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
         IProfileService _profileService;
 
         [ImportingConstructor]
-        public WaitForTargetAvailable(IProfileService profileSerivce)
+        public WaitForTargetAvailable(IProfileService profileService)
         {
-            _profileService = profileSerivce;
+            _profileService = profileService;
         }
 
         private WaitForTargetAvailable(WaitForTargetAvailable cloneMe) : this(cloneMe._profileService)
