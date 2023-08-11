@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,6 +21,7 @@ using NINA.PlateSolving;
 using NINA.PlateSolving.Interfaces;
 using NINA.Profile.Interfaces;
 using NINA.Sequencer.SequenceItem;
+using NINA.Sequencer.Validations;
 using NINA.WPF.Base.ViewModel;
 
 namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
@@ -29,7 +31,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
     [ExportMetadata("Icon", "PlatesolveAndRotateSVG")]
     [ExportMetadata("Category", "Lbl_SequenceCategory_Telescope")]
     [Export(typeof(ISequenceItem))]
-    public class DynamicCenterAndRotate : SequenceItem
+    public class DynamicCenterAndRotate : SequenceItem, IValidatable
     {
         private IProfileService _profileService;
         private ITelescopeMediator _telescopeMediator;
@@ -43,6 +45,17 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
         private IWindowServiceFactory _windowServiceFactory;
 
         public PlateSolvingStatusVM _plateSolveStatusVM { get; } = new PlateSolvingStatusVM();
+
+        private IList<string> issues = new List<string>();
+        public IList<string> Issues
+        {
+            get => issues;
+            set
+            {
+                issues = value;
+                RaisePropertyChanged();
+            }
+        }
 
         [ImportingConstructor]
         public DynamicCenterAndRotate(
@@ -247,6 +260,21 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
 
                 service.DelayedClose(TimeSpan.FromSeconds(10));
             }
+        }
+
+        public virtual bool Validate()
+        {
+            List<string> i = new List<string>();
+            if (!_telescopeMediator.GetInfo().Connected)
+            {
+                i.Add("Telescope not connected");
+            }
+            if (!_rotatorMediator.GetInfo().Connected)
+            {
+                i.Add("Rotator not connected");
+            }
+            Issues = i;
+            return i.Count == 0;
         }
 
         private async Task<PlateSolveResult> Solve(IProgress<ApplicationStatus> progress, CancellationToken token, Coordinates coordinates)

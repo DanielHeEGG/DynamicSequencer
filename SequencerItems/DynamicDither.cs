@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ using NINA.Core.Utility.Notification;
 using NINA.Equipment.Interfaces.Mediator;
 using NINA.Profile.Interfaces;
 using NINA.Sequencer.SequenceItem;
+using NINA.Sequencer.Validations;
 
 namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
 {
@@ -18,10 +20,21 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
     [ExportMetadata("Icon", "DitherSVG")]
     [ExportMetadata("Category", "Lbl_SequenceCategory_Guider")]
     [Export(typeof(ISequenceItem))]
-    public class DynamicDither : SequenceItem
+    public class DynamicDither : SequenceItem, IValidatable
     {
         private IProfileService _profileService;
         private IGuiderMediator _guiderMediator;
+
+        private IList<string> issues = new List<string>();
+        public IList<string> Issues
+        {
+            get => issues;
+            set
+            {
+                issues = value;
+                RaisePropertyChanged();
+            }
+        }
 
         [ImportingConstructor]
         public DynamicDither(IProfileService profileService, IGuiderMediator guiderMediator)
@@ -69,6 +82,17 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
                 return _guiderMediator.Dither(token);
             }
             return Task.CompletedTask;
+        }
+
+        public virtual bool Validate()
+        {
+            List<string> i = new List<string>();
+            if (!_guiderMediator.GetInfo().Connected)
+            {
+                i.Add("Guider not connected");
+            }
+            Issues = i;
+            return i.Count == 0;
         }
 
         public override TimeSpan GetEstimatedDuration()

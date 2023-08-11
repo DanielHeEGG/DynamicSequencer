@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,6 +15,7 @@ using NINA.Equipment.Model;
 using NINA.Profile.Interfaces;
 using NINA.Sequencer.Interfaces;
 using NINA.Sequencer.SequenceItem;
+using NINA.Sequencer.Validations;
 using NINA.WPF.Base.Interfaces.Mediator;
 using NINA.WPF.Base.Interfaces.ViewModel;
 
@@ -24,13 +26,24 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
     [ExportMetadata("Icon", "CameraSVG")]
     [ExportMetadata("Category", "Lbl_SequenceCategory_Camera")]
     [Export(typeof(ISequenceItem))]
-    public class DynamicExposure : SequenceItem, IExposureItem
+    public class DynamicExposure : SequenceItem, IExposureItem, IValidatable
     {
         private IProfileService _profileService;
         private ICameraMediator _cameraMediator;
         private IImagingMediator _imagingMediator;
         private IImageSaveMediator _imageSaveMediator;
         private IImageHistoryVM _imageHistoryVM;
+
+        private IList<string> issues = new List<string>();
+        public IList<string> Issues
+        {
+            get => issues;
+            set
+            {
+                issues = value;
+                RaisePropertyChanged();
+            }
+        }
 
         // To satisfy IExposureItem interface requirements, DO NOT USE
         public double ExposureTime { get; }
@@ -132,6 +145,17 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
             var imageStats = await imageData.Statistics;
 
             _imageHistoryVM.Add(imageData.MetaData.Image.Id, imageStats, CaptureSequence.ImageTypes.LIGHT);
+        }
+
+        public virtual bool Validate()
+        {
+            List<string> i = new List<string>();
+            if (!_cameraMediator.GetInfo().Connected)
+            {
+                i.Add("Camera not connected");
+            }
+            Issues = i;
+            return i.Count == 0;
         }
 
         public override TimeSpan GetEstimatedDuration()

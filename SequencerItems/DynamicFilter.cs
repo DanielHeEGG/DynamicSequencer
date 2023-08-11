@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,6 +12,7 @@ using NINA.Core.Utility.Notification;
 using NINA.Equipment.Interfaces.Mediator;
 using NINA.Profile.Interfaces;
 using NINA.Sequencer.SequenceItem;
+using NINA.Sequencer.Validations;
 
 namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
 {
@@ -19,10 +21,21 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
     [ExportMetadata("Icon", "FW_NoFill_SVG")]
     [ExportMetadata("Category", "Lbl_SequenceCategory_FilterWheel")]
     [Export(typeof(ISequenceItem))]
-    public class DynamicFilter : SequenceItem
+    public class DynamicFilter : SequenceItem, IValidatable
     {
         private IProfileService _profileService;
         private IFilterWheelMediator _filterWheelMediator;
+
+        private IList<string> issues = new List<string>();
+        public IList<string> Issues
+        {
+            get => issues;
+            set
+            {
+                issues = value;
+                RaisePropertyChanged();
+            }
+        }
 
         [ImportingConstructor]
         public DynamicFilter(IProfileService profileService, IFilterWheelMediator filterWheelMediator)
@@ -80,6 +93,17 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
             }
 
             await _filterWheelMediator.ChangeFilter(filter, token, progress);
+        }
+
+        public virtual bool Validate()
+        {
+            List<string> i = new List<string>();
+            if (!_filterWheelMediator.GetInfo().Connected)
+            {
+                i.Add("Filter wheel not connected");
+            }
+            Issues = i;
+            return i.Count == 0;
         }
     }
 }
