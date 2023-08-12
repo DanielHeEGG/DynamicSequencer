@@ -21,6 +21,8 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
         public bool balanceTargets { get; set; }
         public bool centerTargets { get; set; }
         public bool useMechanicalRotation { get; set; }
+        public bool takeFlats { get; set; }
+        public int flatAmount { get; set; }
         public Grader imageGrader { get; set; }
         public List<PTarget> targets { get; set; }
 

@@ -35,6 +35,8 @@ If you're looking for a more straightforward and plug-and-play solution, Target 
 | balanceTargets | bool | When set to `true`, the planner will prioritize the *least* completed target in a project, vice versa. This is helpful for balancing mosaic panels. Does nothing when only one target exists in the project. | `true` |
 | centerTargets | bool | When set to `false`, `DS: Center and Rotate` will skip centering and will only slew then rotate. This may save some time if you have an accurate pointing model. | `true` |
 | useMechanicalRotation | bool | When set to `true`, `DS: Center and Rotate` will save the mechanical rotator position and reuse it instead of platesolving and rotating every time. This saves some time and helps with repeatable flat frames. | `true` |
+| takeFlats | bool | Marks the project for flat frames. This should be set to `false` in most cases. It will be automatically set to `true` by DS upon the completion of a project. Returns to `false` when flat frames are successfully taken. | `false` |
+| flatAmount | int | Amount of flat frames to take, per filter, per target. | `30` |
 | imageGrader.minStars | int | Minimum amount of stars for a frame to pass. | `100` |
 | imageGrader.maxHFR | double | Maximum average star HFR (in pixels) for a frame to pass. | `2.0` |
 | imageGrader.maxGuideError | double | Maximum guiding RMS error (in pixels) for a frame to pass. | `1.0` |
@@ -68,6 +70,8 @@ A valid project JSON file may look something like this:
 	"balanceTargets": true,
 	"centerTargets": true,
 	"useMechanicalRotation": true,
+	"takeFlats": false,
+	"flatAmount": 30,
 	"imageGrader": {
 		"minStars": 100,
 		"maxHFR": 2.0,
@@ -164,6 +168,9 @@ Switches filter in accordance to the exposure plan selected by the planning engi
 
 #### `DS: Dither`
 Sends a dither command to the guiding software when conditions are met. Configurable with the `ditherEvery` setting. This instruction will only send a dither command if the number of frames shot in *any filter* since the last dither/slew exceeds the setting. For example, when `ditherEvery = 1`, a series of frames may look something like this: `SHO'SHO'SHO` or `L'L'LRGB'L'L'LRGB`. Or when `ditherEvery = 2` it may look like: `SHOSHO'SHOSHO` or `LL'LRGBL'LLRGB'LL`.
+
+#### `DS: Take Trained Flats`
+Scans all projects for those marked for flat frames. Will only attempt to take flats for a particular project when all of the following prerequisites are met: `takeFlats = true`, `flatAmount` greater than zero, `useMechanicalRotation = true`, `target.mechanicalRotation` is a valid value, and trained flat presets are available for the specific filter, gain, and binning. The instruction will simply be skipped if any of the prerequisites are not met.
 
 #### `DS: Wait Until Target Available`
 Waits indefinitely until at least one target is returned from the planning engine. Note: the planning engine does not filter for sun altitude, so this should be used along with `Wait if Sun Altitude` or `Wait for Time`.

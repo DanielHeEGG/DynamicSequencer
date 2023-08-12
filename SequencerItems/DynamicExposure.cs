@@ -130,6 +130,11 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
             if (project.imageGrader.GradeImage(renderedImage.RawImageData))
             {
                 exposure.acceptedAmount++;
+                if (project.completion >= 1.0f)
+                {
+                    project.active = false;
+                    project.takeFlats = true;
+                }
                 planner.WriteFiles();
 
                 if (DynamicSequencer.ditherLog.ContainsKey(exposure.ToString())) DynamicSequencer.ditherLog[exposure.ToString()]++;
