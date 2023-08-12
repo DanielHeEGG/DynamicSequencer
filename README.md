@@ -1,17 +1,13 @@
 ﻿# DynamicSequencer
 A plugin for [NINA](https://nighttime-imaging.eu) that dynamically selects an optimal target for imaging, allowing for unattended, multi-night, multi-target automated imaging.
 
-When configured correctly, the plugin selects a target from the pool of targets defined by the user based on configurable criteria and interfaces seamlessly with the NINA advanced sequencer.
+This plugin draws heavy inspiration from Tom Palmer's [Target Scheduler](https://tcpalmer.github.io/nina-scheduler/) plugin and shares a number of similar features. However, DS is designed for the more advanced user who is looking for more control over their sequencer. DS requires prior experience with NINA and the advanced sequencer to get working properly. However, once functioning, it allows you to queue up a whole season's worth of targets and it will automatically choose a target every night, take exposures, filter out bad exposures, and take flats when a project is completed.
 
-This plugin is heavily inspired by Tom Palmer's [Target Scheduler](https://tcpalmer.github.io/nina-scheduler/) Plugin and is very similar in nature. In fact, Dynamic Sequencer began as a private fork of Target Scheduler. However, the amount of changes made slowly grew until the point that it made more sense to completely rewrite it. Large sections of code were directly copied from Target Scheduler.
+DS is designed for setups that are hosted at a permanent or remote observatory, heavily focusing on long-term automation. Although it will certainly work on a mobile setup, an electronic rotator, filter wheel, and flat panel are recommend to get the most out of this plugin.
 
-This plugin differs from Target Scheduler in two main aspects:
-1. Targets are defined by JSON files, no graphical interface is available within NINA.
-2. Individual sequencer instructions are provided instead of one large container (slew, take exposure, change filter vs. one  container that does everything).
+DS adds a series of sequencer instructions such as `DS: Center and Rotate` and `DS: Take Exposure` that act similarly to vanilla NINA instructions but are more dynamic, hence the name of the plugin. When configured correctly, DS selects a project from a pool of projects and takes images automatically as defined by the JSON project files.
 
-This allows for further integration with other scripts that work with JSON, and allow for more granular control.
-
-If you're looking for a more straightforward and plug-and-play solution, Target Scheduler may be better suited for your needs. But if you want more control, this plugin may work better.
+The use of JSON project files allow for easy integration with other tools. Simple scripts can be written to convert lists of coordinates and rotations to the JSON format required by DS. This may be particularly helpful when planning large mosaics or sky surveys. There is no graphical configuration interface within NINA for DS, everything is done via project JSON files.
 
 > **DISCLAIMER**
 > This plugin is in early stages of development and comes with absolutely no warranty. The author of this plugin is not responsible for any potential damage to equipment or lost imaging time. Use at your own risk.
@@ -19,19 +15,19 @@ If you're looking for a more straightforward and plug-and-play solution, Target 
 ## Getting Started
 
 ### **Create a Project**
-1. Create a directory named `DynamicSequencerProjects` under the NINA application folder, usually `C:\Users\USER_NAME\AppData\Local\NINA`.
-2. Create a JSON file in the `DynamicSequencerProjects` directory, it can have any name.
-3. Edit the JSON file with the items from the following table, **all items are mandatory**:
-> **WARNING** There are currently no checks for valid project JSON files built-in. All JSON files within the `DynamicSequencerProjects` directory are loaded by the plugin and assumed to be valid. No warnings may be generated and unexpected behavior may result from an invalid JSON file.
+1. Create a directory named `DynamicSequencerProjects` under the NINA application folder, usually `C:\Users\YOUR_USER_NAME\AppData\Local\NINA`.
+2. Create a project JSON file in the `DynamicSequencerProjects` directory, it can have any name.
+3. Edit the JSON file with the items from the following table, each project will have its own JSON file, **all items are mandatory**:
+> **WARNING** There are currently no checks for valid project JSON. All JSON files within the `DynamicSequencerProjects` directory are loaded by the plugin and assumed to be valid. No warnings may be generated and unexpected behavior, including infinite error loops and crashes, may result from an invalid JSON file.
 
 | Property | Type | Description | Example |
 | --- | --- | --- | --- |
 | name | string | Name of the project | `"M31"` |
-| active | bool | Project is active when `true`. | `true` |
+| active | bool | Project is active when `true`. Automatically set to `false` when a project is completed. | `true` |
 | priority | int | Project priority, lower number is higher priority. | `0` |
 | ditherEvery | int | Amount of frames to take of each filter before dithering | `1` |
 | minimumAltitude | double | Minimum altitude (in degrees) of a target for it to be considered. Set to `0` to disable. | `0` |
-| horizonOffset | double | Minimum altitude (in degress) above the custom horizon  of a target for it to be considered. Disabled if no custom horizon file exists. | `5` |
+| horizonOffset | double | Minimum altitude (in degrees) above the custom horizon of a target for it to be considered. Disabled if no custom horizon file exists. | `5` |
 | balanceTargets | bool | When set to `true`, the planner will prioritize the *least* completed target in a project, vice versa. This is helpful for balancing mosaic panels. Does nothing when only one target exists in the project. | `true` |
 | centerTargets | bool | When set to `false`, `DS: Center and Rotate` will skip centering and will only slew then rotate. This may save some time if you have an accurate pointing model. | `true` |
 | useMechanicalRotation | bool | When set to `true`, `DS: Center and Rotate` will save the mechanical rotator position and reuse it instead of platesolving and rotating every time. This saves some time and helps with repeatable flat frames. | `true` |
@@ -148,7 +144,7 @@ A valid project JSON file may look something like this:
 ```
 ### **Notes on Image Grading**
 * Frames that are rejected do not increment the `acceptedAmount` field.
-* There is no option to turn off image grading, it can be effectively disabled by setting the grading criteria such as `"minStars": 0`.
+* There is no option to turn off image grading, it can be effectively disabled by setting the grading criteria such as `"minStars": -1`.
 * Frames that are rejected are not deleted. Instead, the `Sequence Title` attribute of the frame metadata is edited to have `- REJECTED` at the end. If NINA is configured to include the `$$SEQUENCETITLE$$` attribute in the image file pattern setting, the image's name will change accordingly. For example, if a frame is usually saved as `M31/Panel 1/Ha_2000_01_01.fits`, a rejected frame will be `M31 - REJECTED/Panel 1/Ha_2000_01_01.fits`.
 
 ### **Configure the Advanced Sequencer**
@@ -185,6 +181,12 @@ An example sequence:
 ![ExampleSequence](resources/ExampleSequence.png)
 
 ## Changelog
+### v0.5.0.0
+- Added save mechanical rotation feature
+- Added sequencer item validations
+- Added `DS: Take Trained Flats`
+- Updated README introduction section
+
 ### v0.4.0.0
 - Added `DS: Dither`
 - Projects, targets, and exposures now have unique ids
