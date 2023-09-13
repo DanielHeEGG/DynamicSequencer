@@ -181,6 +181,9 @@ An example sequence:
 ![ExampleSequence](resources/ExampleSequence.png)
 
 ## Changelog
+### v2.1.0.0
+- Versioning is now NINA_MAJOR.MAJOR.MINOR.PATCH
+
 ### v0.5.0.0
 - Added save mechanical rotation feature
 - Added sequencer item validations

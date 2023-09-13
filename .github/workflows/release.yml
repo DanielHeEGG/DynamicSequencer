@@ -10,6 +10,8 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: nina2
       - uses: microsoft/setup-msbuild@v1
       - uses: NuGet/setup-nuget@v1
       - run: nuget restore DynamicSequencer.sln
