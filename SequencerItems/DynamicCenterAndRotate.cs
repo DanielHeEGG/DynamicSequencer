@@ -174,7 +174,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
                             throw new SequenceEntityFailedException(Loc.Instance["LblPlatesolveFailed"]);
                         }
 
-                        var orientation = (float)solveResult.Orientation;
+                        var orientation = (float)solveResult.PositionAngle;
                         _rotatorMediator.Sync(orientation);
 
                         var prevTargetRotation = targetRotation;

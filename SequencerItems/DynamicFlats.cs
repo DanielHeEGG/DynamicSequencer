@@ -84,7 +84,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
 
         public override async Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token)
         {
-            await _flatDeviceMediator.ToggleLight(true, token);
+            await _flatDeviceMediator.ToggleLight(true, progress, token);
 
             var planner = new Planner();
             foreach (PProject project in planner._projects)
@@ -113,13 +113,13 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
                         }
                         await _filterWheelMediator.ChangeFilter(filter, token, progress);
 
-                        var brightnessInfo = _profileService.ActiveProfile.FlatDeviceSettings.GetBrightnessInfo(new FlatDeviceFilterSettingsKey(filter.Position, exposure.binningMode, exposure.gain));
+                        var brightnessInfo = _profileService.ActiveProfile.FlatDeviceSettings.GetTrainedFlatExposureSetting(filter.Position, exposure.binningMode, exposure.gain, exposure.offset);
                         if (brightnessInfo == null)
                         {
                             Notification.ShowWarning($"No trained flat exposure for filter {exposure.filter}, binning {exposure.binning}, gain {exposure.gain}");
                             continue;
                         }
-                        await _flatDeviceMediator.SetBrightness(brightnessInfo.AbsoluteBrightness, token);
+                        await _flatDeviceMediator.SetBrightness(brightnessInfo.Brightness, progress, token);
 
                         if (Math.Abs((double)_rotatorMediator.GetInfo().MechanicalPosition - target.mechanicalRotation) > 0.1)
                         {
@@ -147,7 +147,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
 
                             imageData.MetaData.Target.Name = target.name;
                             imageData.MetaData.Target.Coordinates = target.coordinates;
-                            imageData.MetaData.Target.Rotation = target.skyRotation;
+                            imageData.MetaData.Target.PositionAngle = target.skyRotation;
                             imageData.MetaData.Sequence.Title = project.name;
 
                             await _imageSaveMediator.Enqueue(imageData, prepareTask, progress, token);
@@ -156,7 +156,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
                 }
                 project.takeFlats = false;
             }
-            await _flatDeviceMediator.ToggleLight(false, token);
+            await _flatDeviceMediator.ToggleLight(false, progress, token);
             planner.WriteFiles();
         }
 

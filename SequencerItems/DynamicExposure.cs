@@ -46,11 +46,11 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
         }
 
         // To satisfy IExposureItem interface requirements, DO NOT USE
-        public double ExposureTime { get; }
-        public int Gain { get; }
-        public int Offset { get; }
-        public string ImageType { get; }
-        public BinningMode Binning { get; }
+        public double ExposureTime { get; set; }
+        public int Gain { get; set; }
+        public int Offset { get; set; }
+        public string ImageType { get; set; }
+        public BinningMode Binning { get; set; }
 
         [ImportingConstructor]
         public DynamicExposure(
@@ -124,7 +124,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
 
             imageData.MetaData.Target.Name = target.name;
             imageData.MetaData.Target.Coordinates = target.coordinates;
-            imageData.MetaData.Target.Rotation = target.skyRotation;
+            imageData.MetaData.Target.PositionAngle = target.skyRotation;
             imageData.MetaData.Sequence.Title = project.name;
 
             if (project.imageGrader.GradeImage(renderedImage.RawImageData))
