@@ -142,6 +142,16 @@ A valid project JSON file may look something like this:
 	]
 }
 ```
+### **Notes on Automatic Target Selection**
+* The Planner Engine selects an optimal project, target, and exposure from the pool every time any DS instruction is executed.
+* The engine will maintain a memory of the previous project and target and will always prioritize those as long as they are valid. This memory may be manually cleared at any time with `DS: Reset Memory`.
+* A project is deemed to be valid when: it is active, not completed, and contains at least one valid target.
+* The optimal project is ranked by its priority number. Lower number is higher priority. If two or more valid projects have the same priority, the least completed will rank higher.
+* A target is deemed to be valid when: is it not completed, above the minimum altitude or custom horizon, and contains at least one valid exposure.
+* The optimal target is ranked by completion. When `targets.balanceFilters` is set to `true`, the least completed filter will rank higher, vice versa.
+* An exposure is deemed to be valid when: it is not completed and is sufficiently far away from the moon.
+* The optimal exposure is ranked by moon separation. The more selective (higher number for `moonSeparationAngle` and `moonSeparationWidth`) exposures have higher priority. If two or more valid exposures have the same moon separation requirement, the least completed will rank higher.
+
 ### **Notes on Image Grading**
 * Frames that are rejected do not increment the `acceptedAmount` field.
 * There is no option to turn off image grading, it can be effectively disabled by setting the grading criteria such as `"minStars": -1`.
@@ -158,6 +168,7 @@ Clears memory of current project and current target. The planning engine will re
 
 #### `DS: Take Exposure`
 Takes one exposure in accordance to the exposure plan selected by the planning engine.
+> **WARNING** `DS: Take Exposure` makes no attempt to check if the imaging setup is in the correct configuration (mount pointed at correct object, filter wheel set to correct filter, flat panel open, etc.). As long as the frame taken passes image grading, it will increment the `acceptedAmount` field for the target *it thinks* its pointed at. For example, an imaging setup is previously imaging M31, and the Planner Engine selects a new target M42, if for whatever reason the mount did not slew properly or the `DS: Center and Rotate` instruction was skipped, the subsequent `DS: Take Exposure` instruction will increment the `acceptedAmount` field for M42 and place the frame into the M42 folder while it is actually still shooting M31. The same behavior is true for the filter wheel. Hence, it is generally good practice to set the `On error` option to `Skip current instruction set` within NINA for all DS-related instructions.
 
 #### `DS: Switch Filter`
 Switches filter in accordance to the exposure plan selected by the planning engine.
