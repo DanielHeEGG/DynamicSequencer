@@ -76,7 +76,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
                 throw new SequenceItemSkippedException("Skipping DynamicDither - No valid exposure");
             }
 
-            if (DynamicSequencer.ditherLog.ContainsKey(exposure.ToString()) && DynamicSequencer.ditherLog[exposure.ToString()] >= project.ditherEvery)
+            if (project.ditherEvery > 0 && DynamicSequencer.ditherLog.ContainsKey(exposure.ToString()) && DynamicSequencer.ditherLog[exposure.ToString()] >= project.ditherEvery)
             {
                 DynamicSequencer.ditherLog.Clear();
                 return _guiderMediator.Dither(token);
