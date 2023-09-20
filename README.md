@@ -25,7 +25,7 @@ The use of JSON project files allow for easy integration with other tools. Simpl
 | name | string | Name of the project | `"M31"` |
 | active | bool | Project is active when `true`. Automatically set to `false` when a project is completed. | `true` |
 | priority | int | Project priority, lower number is higher priority. | `0` |
-| ditherEvery | int | Amount of frames to take of each filter before dithering | `1` |
+| ditherEvery | int | Amount of frames to take of each filter before dithering. Set to `0` to disable. | `1` |
 | minimumAltitude | double | Minimum altitude (in degrees) of a target for it to be considered. Set to `0` to disable. | `0` |
 | horizonOffset | double | Minimum altitude (in degrees) above the custom horizon of a target for it to be considered. Disabled if no custom horizon file exists. | `5` |
 | balanceTargets | bool | When set to `true`, the planner will prioritize the *least* completed target in a project, vice versa. This is helpful for balancing mosaic panels. Does nothing when only one target exists in the project. | `true` |
