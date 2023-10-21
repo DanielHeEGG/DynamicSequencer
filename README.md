@@ -192,6 +192,10 @@ An example sequence:
 ![ExampleSequence](resources/ExampleSequence.png)
 
 ## Changelog
+### v3.1.1.0
+- Added option to disable dithering
+- Fixed AF trigger issue with DynamicExposure (again)
+
 ### v3.1.0.0
 - Ported to NINA 3
 - Versioning is now NINA_MAJOR.MAJOR.MINOR.PATCH
