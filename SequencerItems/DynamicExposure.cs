@@ -65,6 +65,9 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
             _imagingMediator = imagingMediator;
             _imageSaveMediator = imageSaveMediator;
             _imageHistoryVM = imageHistoryVM;
+
+            // Autofocus trigger checks for this
+            ImageType = "LIGHT";
         }
 
         private DynamicExposure(DynamicExposure cloneMe) : this(
