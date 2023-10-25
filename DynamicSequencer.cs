@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
-
-using DanielHeEGG.NINA.DynamicSequencer.PlannerEngine;
+using System.IO;
 
 using NINA.Core.Utility;
 using NINA.Plugin;
@@ -15,6 +15,8 @@ namespace DanielHeEGG.NINA.DynamicSequencer
     [Export(typeof(IPluginManifest))]
     public class DynamicSequencer : PluginBase
     {
+        public static readonly string projectDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "DynamicSequencer", "Projects");
+
         public static string previousProject = "";
         public static string previousTarget = "";
         public static Dictionary<string, int> ditherLog = new Dictionary<string, int>();
@@ -32,6 +34,8 @@ namespace DanielHeEGG.NINA.DynamicSequencer
             }
 
             _profileService = profileService;
+
+            Directory.CreateDirectory(projectDir);
         }
     }
 }

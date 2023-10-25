@@ -5,7 +5,6 @@ using System.IO;
 using Newtonsoft.Json;
 
 using NINA.Astrometry;
-using NINA.Core.Utility;
 using NINA.Profile.Interfaces;
 
 namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
@@ -18,8 +17,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
         {
             _projects = new List<PProject>();
 
-            string projectDir = Path.Combine(CoreUtil.APPLICATIONTEMPPATH, "DynamicSequencerProjects");
-            foreach (string filename in Directory.GetFiles(projectDir, "*.json"))
+            foreach (string filename in Directory.GetFiles(DynamicSequencer.projectDir, "*.json"))
             {
                 using (StreamReader r = File.OpenText(filename))
                 {
