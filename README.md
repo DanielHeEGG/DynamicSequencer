@@ -15,10 +15,9 @@ The use of JSON project files allow for easy integration with other tools. Simpl
 ## Getting Started
 
 ### **Create a Project**
-1. Create a directory named `DynamicSequencerProjects` under the NINA application folder, usually `C:\Users\YOUR_USER_NAME\AppData\Local\NINA`.
-2. Create a project JSON file in the `DynamicSequencerProjects` directory, it can have any name.
-3. Edit the JSON file with the items from the following table, each project will have its own JSON file, **all items are mandatory**:
-> **WARNING** There are currently no checks for valid project JSON. All JSON files within the `DynamicSequencerProjects` directory are loaded by the plugin and assumed to be valid. No warnings may be generated and unexpected behavior, including infinite error loops and crashes, may result from an invalid JSON file.
+1. Create a project JSON file in the `Documents\DynamicSequencer\Projects` directory, it can have any name.
+2. Edit the JSON file with the items from the following table, each project will have its own JSON file, **all items are mandatory**:
+> **WARNING** There are currently no checks for valid project JSON. All JSON files within the `Projects` directory are loaded by the plugin and assumed to be valid. No warnings may be generated and unexpected behavior, including infinite error loops and crashes, may result from an invalid JSON file.
 
 | Property | Type | Description | Example |
 | --- | --- | --- | --- |
