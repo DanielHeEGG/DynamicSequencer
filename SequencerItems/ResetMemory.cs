@@ -29,9 +29,12 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
 
         public override Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token)
         {
+            DynamicSequencer.logger.Information("ResetMemory");
+
             DynamicSequencer.previousProject = "";
             DynamicSequencer.previousTarget = "";
             DynamicSequencer.ditherLog.Clear();
+
             return Task.CompletedTask;
         }
 
