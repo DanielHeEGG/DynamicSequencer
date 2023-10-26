@@ -199,6 +199,11 @@ An example sequence:
 ![ExampleSequence](resources/ExampleSequence.png)
 
 ## Changelog
+### v3.2.0.0
+- Projects are now located under `Documents\DynamicSequencer\Projects`
+- Added `settings.json` file
+- Added logger and option to enable debug logging
+
 ### v3.1.1.0
 - Added option to disable dithering
 - Fixed AF trigger issue with DynamicExposure (again)
