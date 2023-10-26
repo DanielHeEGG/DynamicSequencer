@@ -93,9 +93,14 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
         {
             foreach (PTarget target in targets)
             {
+                DynamicSequencer.logger.Debug($"Planner: ---- filtering target '{target.name}'");
+
                 if (target.completion >= 1.0f)
                 {
                     target.valid = false;
+
+                    DynamicSequencer.logger.Debug($"Planner: ---- rejected (completed)");
+
                     continue;
                 }
 
@@ -104,6 +109,9 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
                 if (targetAltitude < minimumAltitude)
                 {
                     target.valid = false;
+
+                    DynamicSequencer.logger.Debug($"Planner: ---- rejected (altitude)");
+
                     continue;
                 }
 
@@ -111,10 +119,15 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
                 if (horizon != null && targetAltitude < horizon.GetAltitude(targetAzimuth) + horizonOffset)
                 {
                     target.valid = false;
+
+                    DynamicSequencer.logger.Debug($"Planner: ---- rejected (horizon offset)");
+
                     continue;
                 }
 
                 target.Filter(profileService, time, location);
+
+                if (!target.valid) DynamicSequencer.logger.Debug($"Planner: ---- rejected (no valid exposures)");
             }
         }
 
@@ -122,6 +135,8 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
         {
             if (targets.Count == 0)
             {
+                DynamicSequencer.logger.Debug($"Planner: ---- no target selected (empty list)");
+
                 return null;
             }
 
@@ -129,6 +144,8 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
             {
                 if (target.valid && target.ToString() == DynamicSequencer.previousTarget)
                 {
+                    DynamicSequencer.logger.Debug($"Planner: ---- target '{target.name}' selected (previous target)");
+
                     return target;
                 }
             }
@@ -139,7 +156,16 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
                 return prioValid == 0 ? (balanceTargets ? (int)((x.completion - y.completion) * 1000) : (int)((y.completion - x.completion) * 1000)) : prioValid;
             });
 
-            return targets[0].valid ? targets[0] : null;
+            if (targets[0].valid)
+            {
+                DynamicSequencer.logger.Debug($"Planner: ---- target '{targets[0].name}' selected (best target)");
+
+                return targets[0];
+            }
+
+            DynamicSequencer.logger.Debug($"Planner: ---- no target selected (no valid target)");
+
+            return null;
         }
 
         public override string ToString()

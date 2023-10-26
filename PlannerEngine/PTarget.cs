@@ -89,17 +89,26 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
         {
             foreach (PExposure exposure in exposures)
             {
+                DynamicSequencer.logger.Debug($"Planner: ---- ---- filtering exposure '{exposure.filter}'");
+
                 if (exposure.completion >= 1.0f)
                 {
                     exposure.valid = false;
+
+                    DynamicSequencer.logger.Debug($"Planner: ---- ---- rejected (completed)");
+
                     continue;
                 }
 
                 if (AstrometryUtils.GetMoonSeparation(location, rightAscension, declination, time) < AstrometryUtils.GetMoonAvoidanceLorentzianSeparation(time, exposure.moonSeparationAngle, exposure.moonSeparationWidth) || exposure.completion >= 1.0)
                 {
                     exposure.valid = false;
+
+                    DynamicSequencer.logger.Debug($"Planner: ---- ---- rejected (moon separation)");
+
                     continue;
                 }
+
                 exposure.valid = true;
             }
         }
@@ -108,6 +117,8 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
         {
             if (exposures.Count == 0)
             {
+                DynamicSequencer.logger.Debug($"Planner: ---- ---- no exposure selected (empty list)");
+
                 return null;
             }
 
@@ -120,7 +131,16 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
                 return prioValid == 0 ? (prioMoonSep == 0 ? (int)(prioProgress * 1000) : (int)(prioMoonSep * 1000)) : prioValid;
             });
 
-            return exposures[0].valid ? exposures[0] : null;
+            if (exposures[0].valid)
+            {
+                DynamicSequencer.logger.Debug($"Planner: ---- ---- exposure '{exposures[0].filter}' selected (best exposure)");
+
+                return exposures[0];
+            }
+
+            DynamicSequencer.logger.Debug($"Planner: ---- ---- no exposure selected (no valid exposure)");
+
+            return null;
         }
 
         public override string ToString()

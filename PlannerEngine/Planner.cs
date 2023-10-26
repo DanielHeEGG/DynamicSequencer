@@ -25,6 +25,8 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
                     PProject project = (PProject)serializer.Deserialize(r, typeof(PProject));
                     project.filename = filename;
                     _projects.Add(project);
+
+                    DynamicSequencer.logger.Debug($"Planner: loaded project '{project.name}', filename '{project.filename}'");
                 }
             }
         }
@@ -38,6 +40,8 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
                     JsonSerializer serializer = new JsonSerializer();
                     serializer.Formatting = Formatting.Indented;
                     serializer.Serialize(w, project);
+
+                    DynamicSequencer.logger.Debug($"Planner: wrote project '{project.name}', filename '{project.filename}'");
                 }
             }
         }
@@ -53,18 +57,30 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
 
             foreach (PProject project in _projects)
             {
+                DynamicSequencer.logger.Debug($"Planner: filtering project '{project.name}'");
+
                 if (project.completion >= 1.0f)
                 {
                     project.active = false;
+                    project.valid = false;
+
+                    DynamicSequencer.logger.Debug($"Planner: rejected (completed)");
+
+                    continue;
                 }
 
                 if (!project.active)
                 {
                     project.valid = false;
+
+                    DynamicSequencer.logger.Debug($"Planner: rejected (inactive)");
+
                     continue;
                 }
 
                 project.Filter(profileService, time, location);
+
+                if (!project.valid) DynamicSequencer.logger.Debug($"Planner: rejected (no valid targets)");
             }
         }
 
@@ -72,6 +88,8 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
         {
             if (_projects.Count == 0)
             {
+                DynamicSequencer.logger.Debug($"Planner: no project selected (empty list)");
+
                 return null;
             }
 
@@ -79,6 +97,8 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
             {
                 if (project.valid && project.ToString() == DynamicSequencer.previousProject)
                 {
+                    DynamicSequencer.logger.Debug($"Planner: project '{project.name}' selected (previous project)");
+
                     return project;
                 }
             }
@@ -89,7 +109,16 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
                 return prioValid == 0 ? (x.priority == y.priority ? (int)((y.completion - x.completion) * 1000) : x.priority - y.priority) : prioValid;
             });
 
-            return _projects[0].valid ? _projects[0] : null;
+            if (_projects[0].valid)
+            {
+                DynamicSequencer.logger.Debug($"Planner: project '{_projects[0].name}' selected (best project)");
+
+                return _projects[0];
+            }
+
+            DynamicSequencer.logger.Debug($"Planner: no project selected (no valid project)");
+
+            return null;
         }
     }
 }
