@@ -34,9 +34,20 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
 
         public override bool Check(ISequenceItem previousItem, ISequenceItem nextItem)
         {
+            DynamicSequencer.logger.Debug("TargetAvailableCondition: execute");
+
             Planner planner = new Planner();
             planner.Filter(_profileService);
-            return planner.Best() != null;
+            if (planner.Best() != null)
+            {
+                DynamicSequencer.logger.Debug("TargetAvailableCondition: valid target found");
+
+                return true;
+            }
+
+            DynamicSequencer.logger.Debug("TargetAvailableCondition: no valid target");
+
+            return false;
         }
     }
 }
