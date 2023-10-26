@@ -93,6 +93,12 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
         {
             foreach (PTarget target in targets)
             {
+                if (target.completion >= 1.0f)
+                {
+                    target.valid = false;
+                    continue;
+                }
+
                 double targetAltitude = AstrometryUtils.GetAltitude(location, target.rightAscension, target.declination, time);
                 double targetAzimuth = AstrometryUtils.GetAzimuth(location, target.rightAscension, target.declination, time);
 
