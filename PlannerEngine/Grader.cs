@@ -13,10 +13,37 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
 
         public bool GradeImage(IImageData imageData)
         {
-            if (imageData == null) return false;
-            if (imageData.StarDetectionAnalysis.DetectedStars < minStars) return false;
-            if (imageData.StarDetectionAnalysis.HFR > maxHFR) return false;
-            if (imageData.MetaData.Image.RecordedRMS.Total > maxGuideError) return false;
+            if (imageData == null)
+            {
+                DynamicSequencer.logger.Debug("Grader: no data");
+
+                return false;
+            }
+
+            int starCount = imageData.StarDetectionAnalysis.DetectedStars;
+            if (starCount < minStars)
+            {
+                DynamicSequencer.logger.Debug($"Grader: rejected, star count {starCount}/{minStars}");
+
+                return false;
+            }
+
+            double HFR = imageData.StarDetectionAnalysis.HFR;
+            if (HFR > maxHFR)
+            {
+                DynamicSequencer.logger.Debug($"Grader: rejected, HFR {HFR}/{maxHFR}");
+
+                return false;
+            }
+
+            double guideError = imageData.MetaData.Image.RecordedRMS.Total;
+            if (guideError > maxGuideError)
+            {
+                DynamicSequencer.logger.Debug($"Grader: rejected, guide error {guideError}/{maxGuideError}");
+
+                return false;
+            }
+
             return true;
         }
 

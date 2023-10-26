@@ -87,23 +87,31 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
 
         public override async Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token)
         {
+            DynamicSequencer.logger.Debug("Exposure: execute");
+
             var planner = new Planner();
             planner.Filter(_profileService);
             var project = planner.Best();
             if (project == null)
             {
+                DynamicSequencer.logger.Warning("Exposure: no project");
+
                 Notification.ShowWarning("Skipping DynamicExposure - No valid project");
                 throw new SequenceItemSkippedException("Skipping DynamicExposure - No valid project");
             }
             var target = project.Best();
             if (target == null)
             {
+                DynamicSequencer.logger.Warning("Exposure: no target");
+
                 Notification.ShowWarning("Skipping DynamicExposure - No valid target");
                 throw new SequenceItemSkippedException("Skipping DynamicExposure - No valid target");
             }
             var exposure = target.Best();
             if (exposure == null)
             {
+                DynamicSequencer.logger.Warning("Exposure: no exposure");
+
                 Notification.ShowWarning("Skipping DynamicExposure - No valid exposure");
                 throw new SequenceItemSkippedException("Skipping DynamicExposure - No valid exposure");
             }
@@ -119,6 +127,8 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
                 TotalExposureCount = 1
             };
 
+            DynamicSequencer.logger.Information($"Exposure: taking exposure '{project.name}' - '{target.name}' - '{exposure.filter}'");
+
             var exposureData = await _imagingMediator.CaptureImage(capture, token, progress);
 
             var imageData = await exposureData.ToImageData(progress, token);
@@ -133,18 +143,35 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
             if (project.imageGrader.GradeImage(renderedImage.RawImageData))
             {
                 exposure.acceptedAmount++;
+
+                DynamicSequencer.logger.Information($"Exposure: image accepted, progress {exposure.acceptedAmount}/{exposure.requiredAmount}");
+
                 if (project.completion >= 1.0f)
                 {
+                    DynamicSequencer.logger.Debug("Exposure: project complete");
+
                     project.active = false;
                     project.takeFlats = true;
                 }
                 planner.WriteFiles();
 
-                if (DynamicSequencer.ditherLog.ContainsKey(exposure.ToString())) DynamicSequencer.ditherLog[exposure.ToString()]++;
-                else DynamicSequencer.ditherLog.Add(exposure.ToString(), 1);
+                if (DynamicSequencer.ditherLog.ContainsKey(exposure.ToString()))
+                {
+                    DynamicSequencer.logger.Debug("Exposure: in ditherLog, increment count");
+
+                    DynamicSequencer.ditherLog[exposure.ToString()]++;
+                }
+                else
+                {
+                    DynamicSequencer.logger.Debug("Exposure: not in ditherLog, adding");
+
+                    DynamicSequencer.ditherLog.Add(exposure.ToString(), 1);
+                }
             }
             else
             {
+                DynamicSequencer.logger.Information("Exposure: image rejected");
+
                 imageData.MetaData.Sequence.Title += " - REJECTED";
             }
 
