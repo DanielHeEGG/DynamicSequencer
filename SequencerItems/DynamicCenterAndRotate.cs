@@ -104,31 +104,35 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
 
         public override async Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token)
         {
+            DynamicSequencer.logger.Debug("CenterAndRotate: execute");
+
             var planner = new Planner();
             planner.Filter(_profileService);
             var project = planner.Best();
             if (project == null)
             {
+                DynamicSequencer.logger.Warning("CenterAndRotate: no project");
+
                 Notification.ShowWarning("Skipping DynamicCenterAndRotate - No valid project");
                 throw new SequenceItemSkippedException("Skipping DynamicCenterAndRotate - No valid project");
             }
             var target = project.Best();
             if (target == null)
             {
+                DynamicSequencer.logger.Warning("CenterAndRotate: no target");
+
                 Notification.ShowWarning("Skipping DynamicCenterAndRotate - No valid target");
                 throw new SequenceItemSkippedException("Skipping DynamicCenterAndRotate - No valid target");
-            }
-            var exposure = target.Best();
-            if (exposure == null)
-            {
-                Notification.ShowWarning("Skipping DynamicCenterAndRotate - No valid exposure");
-                throw new SequenceItemSkippedException("Skipping DynamicCenterAndRotate - No valid exposure");
             }
 
             if (project.ToString() == DynamicSequencer.previousProject && target.ToString() == DynamicSequencer.previousTarget)
             {
+                DynamicSequencer.logger.Information("CenterAndRotate: same target, skipped");
+
                 return;
             }
+
+            DynamicSequencer.logger.Information($"CenterAndRotate: slew to new target '{project.name}' - '{target.name}'");
 
             if (_telescopeMediator.GetInfo().AtPark)
             {
@@ -163,6 +167,8 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
 
                 if ((!project.useMechanicalRotation) || (target.mechanicalRotation < 0))
                 {
+                    DynamicSequencer.logger.Debug("CenterAndRotate: rotate with skyRotation");
+
                     var targetRotation = (float)target.skyRotation;
 
                     /* Loop until the rotation is within tolerances*/
@@ -216,18 +222,24 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
 
                     if (project.useMechanicalRotation)
                     {
+                        DynamicSequencer.logger.Debug("CenterAndRotate: update mechanicalRotation");
+
                         target.mechanicalRotation = (double)_rotatorMediator.GetInfo().MechanicalPosition;
                         planner.WriteFiles();
                     }
                 }
                 if (project.useMechanicalRotation && Math.Abs((double)_rotatorMediator.GetInfo().MechanicalPosition - target.mechanicalRotation) > 0.1)
                 {
+                    DynamicSequencer.logger.Debug("CenterAndRotate: rotate with mechanicalRotation");
+
                     await _rotatorMediator.MoveMechanical((float)target.mechanicalRotation, token);
                 }
 
                 /* Once everything is in place do a centering of the object */
                 if (project.centerTargets)
                 {
+                    DynamicSequencer.logger.Debug("CenterAndRotate: center target");
+
                     var centerResult = await DoCenter(progress, token, target.coordinates);
 
                     if (!centerResult.Success)
@@ -238,6 +250,8 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
             }
             finally
             {
+                DynamicSequencer.logger.Debug("CenterAndRotate: set memory");
+
                 DynamicSequencer.previousProject = project.ToString();
                 DynamicSequencer.previousTarget = target.ToString();
                 DynamicSequencer.ditherLog.Clear();
