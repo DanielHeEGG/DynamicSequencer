@@ -84,6 +84,8 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
 
         public override async Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token)
         {
+            DynamicSequencer.logger.Debug("Flat: execute");
+
             await _flatDeviceMediator.ToggleLight(true, progress, token);
 
             var planner = new Planner();
@@ -93,7 +95,12 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
 
                 foreach (PTarget target in project.targets)
                 {
-                    if (target.mechanicalRotation < 0) continue;
+                    if (target.mechanicalRotation < 0)
+                    {
+                        DynamicSequencer.logger.Debug($"Flat: '{project.name}' - '{target.name}' does not contain rotation info, skipped");
+
+                        continue;
+                    }
 
                     foreach (PExposure exposure in target.exposures)
                     {
@@ -108,6 +115,8 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
                         }
                         if (filter == null)
                         {
+                            DynamicSequencer.logger.Error($"Flat: no matching filter for name '{exposure.filter}', skipped");
+
                             Notification.ShowWarning($"No matching filter name for {exposure.filter}");
                             continue;
                         }
@@ -116,6 +125,8 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
                         var brightnessInfo = _profileService.ActiveProfile.FlatDeviceSettings.GetTrainedFlatExposureSetting(filter.Position, exposure.binningMode, exposure.gain, exposure.offset);
                         if (brightnessInfo == null)
                         {
+                            DynamicSequencer.logger.Error($"Flat: no trained flat exposure for filter '{exposure.filter}', binning {exposure.binning}, gain {exposure.gain}, skipped");
+
                             Notification.ShowWarning($"No trained flat exposure for filter {exposure.filter}, binning {exposure.binning}, gain {exposure.gain}");
                             continue;
                         }
@@ -123,11 +134,15 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
 
                         if (Math.Abs((double)_rotatorMediator.GetInfo().MechanicalPosition - target.mechanicalRotation) > 0.1)
                         {
+                            DynamicSequencer.logger.Debug($"Flat: rotate to {target.mechanicalRotation}");
+
                             await _rotatorMediator.MoveMechanical((float)target.mechanicalRotation, token);
                         }
 
                         for (int i = 0; i < project.flatAmount; i++)
                         {
+                            DynamicSequencer.logger.Debug($"Flat: '{project.name}' - '{target.name}' - '{exposure.filter}' progress {i + 1}/{project.flatAmount}");
+
                             var capture = new CaptureSequence()
                             {
                                 ExposureTime = brightnessInfo.Time,
@@ -152,6 +167,8 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
 
                             await _imageSaveMediator.Enqueue(imageData, prepareTask, progress, token);
                         }
+
+                        DynamicSequencer.logger.Information($"Flat: '{project.name}' - '{target.name}' - '{exposure.filter}', {project.flatAmount} frames");
                     }
                 }
                 project.takeFlats = false;
