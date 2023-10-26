@@ -89,6 +89,12 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
         {
             foreach (PExposure exposure in exposures)
             {
+                if (exposure.completion >= 1.0f)
+                {
+                    exposure.valid = false;
+                    continue;
+                }
+
                 if (AstrometryUtils.GetMoonSeparation(location, rightAscension, declination, time) < AstrometryUtils.GetMoonAvoidanceLorentzianSeparation(time, exposure.moonSeparationAngle, exposure.moonSeparationWidth) || exposure.completion >= 1.0)
                 {
                     exposure.valid = false;
