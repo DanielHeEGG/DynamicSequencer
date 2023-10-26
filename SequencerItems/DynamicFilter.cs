@@ -56,23 +56,31 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
 
         public override async Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token)
         {
+            DynamicSequencer.logger.Debug("Filter: execute");
+
             var planner = new Planner();
             planner.Filter(_profileService);
             var project = planner.Best();
             if (project == null)
             {
+                DynamicSequencer.logger.Warning("Filter: no project");
+
                 Notification.ShowWarning("Skipping DynamicFilter - No valid project");
                 throw new SequenceItemSkippedException("Skipping DynamicFilter - No valid project");
             }
             var target = project.Best();
             if (target == null)
             {
+                DynamicSequencer.logger.Warning("Filter: no target");
+
                 Notification.ShowWarning("Skipping DynamicFilter - No valid target");
                 throw new SequenceItemSkippedException("Skipping DynamicFilter - No valid target");
             }
             var exposure = target.Best();
             if (exposure == null)
             {
+                DynamicSequencer.logger.Warning("Filter: no exposure");
+
                 Notification.ShowWarning("Skipping DynamicFilter - No valid exposure");
                 throw new SequenceItemSkippedException("Skipping DynamicFilter - No valid exposure");
             }
@@ -88,9 +96,13 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
             }
             if (filter == null)
             {
+                DynamicSequencer.logger.Error($"Filter: no matching filter for name '{exposure.filter}'");
+
                 Notification.ShowWarning("Skipping DynamicFilter - No matching filter");
                 throw new SequenceItemSkippedException("Skipping DynamicFilter - No matching filter");
             }
+
+            DynamicSequencer.logger.Information($"Filter: selected '{exposure.filter}'");
 
             await _filterWheelMediator.ChangeFilter(filter, token, progress);
         }
