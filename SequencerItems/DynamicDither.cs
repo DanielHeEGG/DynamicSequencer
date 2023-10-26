@@ -55,33 +55,61 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
 
         public override Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token)
         {
+            DynamicSequencer.logger.Debug("Dither: execute");
+
             var planner = new Planner();
             planner.Filter(_profileService);
             var project = planner.Best();
             if (project == null)
             {
+                DynamicSequencer.logger.Warning("Dither: no project");
+
                 Notification.ShowWarning("Skipping DynamicDither - No valid project");
                 throw new SequenceItemSkippedException("Skipping DynamicDither - No valid project");
             }
             var target = project.Best();
             if (target == null)
             {
+                DynamicSequencer.logger.Warning("Dither: no target");
+
                 Notification.ShowWarning("Skipping DynamicDither - No valid target");
                 throw new SequenceItemSkippedException("Skipping DynamicDither - No valid target");
             }
             var exposure = target.Best();
             if (exposure == null)
             {
+                DynamicSequencer.logger.Warning("Dither: no exposure");
+
                 Notification.ShowWarning("Skipping DynamicDither - No valid exposure");
                 throw new SequenceItemSkippedException("Skipping DynamicDither - No valid exposure");
             }
 
-            if (project.ditherEvery > 0 && DynamicSequencer.ditherLog.ContainsKey(exposure.ToString()) && DynamicSequencer.ditherLog[exposure.ToString()] >= project.ditherEvery)
+            if (project.ditherEvery <= 0)
             {
-                DynamicSequencer.ditherLog.Clear();
-                return _guiderMediator.Dither(token);
+                DynamicSequencer.logger.Debug("Dither: project disabled dither, skipped");
+
+                return Task.CompletedTask;
             }
-            return Task.CompletedTask;
+
+            if (!DynamicSequencer.ditherLog.ContainsKey(exposure.ToString()))
+            {
+                DynamicSequencer.logger.Debug("Dither: exposure not in ditherLog, skipped");
+
+                return Task.CompletedTask;
+            }
+
+            int exposureCount = DynamicSequencer.ditherLog[exposure.ToString()];
+            if (exposureCount < project.ditherEvery)
+            {
+                DynamicSequencer.logger.Information($"Dither: exposure count {exposureCount}/{project.ditherEvery}, skipped");
+
+                return Task.CompletedTask;
+            }
+
+            DynamicSequencer.logger.Information("Dither: dither command");
+
+            DynamicSequencer.ditherLog.Clear();
+            return _guiderMediator.Dither(token);
         }
 
         public virtual bool Validate()
