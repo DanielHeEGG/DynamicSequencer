@@ -39,6 +39,8 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
 
         public override async Task Execute(IProgress<ApplicationStatus> progress, CancellationToken token)
         {
+            DynamicSequencer.logger.Information("WaitForTargetAvailable: start");
+
             while (true)
             {
                 Planner planner = new Planner();
@@ -49,6 +51,8 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
                 }
                 await CoreUtil.Delay(TimeSpan.FromSeconds(1), token);
             }
+
+            DynamicSequencer.logger.Information("WaitForTargetAvailable: complete");
         }
     }
 }
