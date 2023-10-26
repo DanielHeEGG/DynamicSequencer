@@ -34,12 +34,22 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
 
         public override bool Check(ISequenceItem previousItem, ISequenceItem nextItem)
         {
+            DynamicSequencer.logger.Debug("ProjectAvailableCondition: execute");
+
             Planner planner = new Planner();
             planner.Filter(_profileService);
             foreach (PProject project in planner._projects)
             {
-                if (project.active) return true;
+                if (project.active)
+                {
+                    DynamicSequencer.logger.Debug("ProjectAvailableCondition: active project found");
+
+                    return true;
+                }
             }
+
+            DynamicSequencer.logger.Debug("ProjectAvailableCondition: no active project");
+
             return false;
         }
     }
