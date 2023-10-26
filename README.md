@@ -1,4 +1,6 @@
 ﻿# DynamicSequencer
+> DynamicSequencer for NINA 2 is now deprecated as of v2.2.0.0. All new features will be developed on v3 and only critical bugfixes will be addressed in v2.
+
 A plugin for [NINA](https://nighttime-imaging.eu) that dynamically selects an optimal target for imaging, allowing for unattended, multi-night, multi-target automated imaging.
 
 This plugin draws heavy inspiration from Tom Palmer's [Target Scheduler](https://tcpalmer.github.io/nina-scheduler/) plugin and shares a number of similar features. However, DS is designed for the more advanced user who is looking for more control over their sequencer. DS requires prior experience with NINA and the advanced sequencer to get working properly. However, once functioning, it allows you to queue up a whole season's worth of targets and it will automatically choose a target every night, take exposures, filter out bad exposures, and take flats when a project is completed.
@@ -191,6 +193,11 @@ An example sequence:
 ![ExampleSequence](resources/ExampleSequence.png)
 
 ## Changelog
+### v2.2.0.0
+- DynamicSequencer 2 is now deprecated
+- Project files are now under `Documents\DynamicSequencer\Projects`
+- Fixed bug where completed exposures were incorrectly marked as valid
+
 ### v2.1.1.0
 - Added option to disable dithering
 - Fixed AF trigger issue with DynamicExposure (again)
