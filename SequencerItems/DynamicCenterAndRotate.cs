@@ -210,7 +210,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
                             }
                         }
 
-                        if (!Angle.ByDegree(rotationDistance).Equals(Angle.Zero, Angle.ByDegree(_profileService.ActiveProfile.PlateSolveSettings.RotationTolerance)))
+                        if (!Angle.ByDegree(rotationDistance).Equals(Angle.Zero, Angle.ByDegree(_profileService.ActiveProfile.PlateSolveSettings.RotationTolerance), true))
                         {
                             Logger.Info($"Rotator not inside tolerance {_profileService.ActiveProfile.PlateSolveSettings.RotationTolerance} - Current {orientation}° / Target: {target.skyRotation}° - Moving rotator relatively by {rotationDistance}°");
                             progress?.Report(new ApplicationStatus() { Status = Loc.Instance["LblRotating"] });
@@ -218,7 +218,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
                             progress?.Report(new ApplicationStatus() { Status = string.Empty });
                             token.ThrowIfCancellationRequested();
                         }
-                    } while (!Angle.ByDegree(rotationDistance).Equals(Angle.Zero, Angle.ByDegree(_profileService.ActiveProfile.PlateSolveSettings.RotationTolerance)));
+                    } while (!Angle.ByDegree(rotationDistance).Equals(Angle.Zero, Angle.ByDegree(_profileService.ActiveProfile.PlateSolveSettings.RotationTolerance), true));
 
                     if (project.useMechanicalRotation)
                     {
