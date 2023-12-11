@@ -45,8 +45,8 @@ Global plugin settings are located in the `settings.json` file. Settings are lis
 | imageGrader.maxGuideError | double | Maximum guiding RMS error (in pixels) for a frame to pass. | `1.0` |
 | targets | list | | |
 | targets.name | string | Name of the target | `"Panel 1"` |
-| targets.rightAscension | double | RA of the target in degrees, JNOW | `11.0029` |
-| targets.declination | double | Dec of the target in degrees, JNOW | `41.3956` |
+| targets.rightAscension | double | RA of the target in degrees, J2000 | `11.0029` |
+| targets.declination | double | Dec of the target in degrees, J2000 | `41.3956` |
 | targets.skyRotation | double | Sky orientation of the target in degrees. This is ignored when `useMechanicalRotation = true` and when there is a valid mechanical rotation value in `targets.mechanicalRotation` | `55` |
 | targets.mechanicalRotation | double | Mechanical orientation of the rotator in degrees. When `useMechanicalRotation = true` and set to a value less than zero, the planner will attempt to figure out this value when this target is first selected and will save it to the json file for future use. All subsequent slews and rotates on this target will use this value. If there is a major change in the optical train that renders this value inaccurate, it may be reset by simply changing the value to a number below zero again. | `-1` |
 | targets.balanceFilters | bool | When set to `true`, the planner will prioritize the *least* completed filter in the target, vice versa. Does nothing when only one filter exists. | `true` |

@@ -48,7 +48,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
         [JsonIgnore]
         public Coordinates coordinates
         {
-            get { return new Coordinates(rightAscension, declination, Epoch.JNOW, Coordinates.RAType.Degrees); }
+            get { return new Coordinates(rightAscension, declination, Epoch.J2000, Coordinates.RAType.Degrees); }
         }
 
         [JsonIgnore]
