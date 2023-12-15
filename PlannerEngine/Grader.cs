@@ -15,7 +15,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
         {
             if (imageData == null)
             {
-                DynamicSequencer.logger.Debug("Grader: no data");
+                DynamicSequencer.logger.Warning("Grader: no data");
 
                 return false;
             }
@@ -23,7 +23,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
             int starCount = imageData.StarDetectionAnalysis.DetectedStars;
             if (starCount < minStars)
             {
-                DynamicSequencer.logger.Debug($"Grader: rejected, star count {starCount}/{minStars}");
+                DynamicSequencer.logger.Information($"Grader: rejected, star count {starCount}/{minStars}");
 
                 return false;
             }
@@ -31,7 +31,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
             double HFR = imageData.StarDetectionAnalysis.HFR;
             if (HFR > maxHFR)
             {
-                DynamicSequencer.logger.Debug($"Grader: rejected, HFR {HFR}/{maxHFR}");
+                DynamicSequencer.logger.Information($"Grader: rejected, HFR {HFR}/{maxHFR}");
 
                 return false;
             }
@@ -39,7 +39,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
             double guideError = imageData.MetaData.Image.RecordedRMS.Total;
             if (guideError > maxGuideError)
             {
-                DynamicSequencer.logger.Debug($"Grader: rejected, guide error {guideError}/{maxGuideError}");
+                DynamicSequencer.logger.Information($"Grader: rejected, guide error {guideError}/{maxGuideError}");
 
                 return false;
             }

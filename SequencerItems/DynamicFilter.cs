@@ -92,7 +92,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
             {
                 DynamicSequencer.logger.Error($"Filter: no matching filter for name '{exposure.filter}'");
 
-                Notification.ShowWarning("Skipping DynamicFilter - No matching filter");
+                Notification.ShowError("Skipping DynamicFilter - No matching filter");
                 throw new SequenceItemSkippedException("Skipping DynamicFilter - No matching filter");
             }
 

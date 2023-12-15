@@ -136,6 +136,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
 
             if (_telescopeMediator.GetInfo().AtPark)
             {
+                DynamicSequencer.logger.Error("CenterAndRotate: telescope parked, skipped");
                 Notification.ShowError(Loc.Instance["LblTelescopeParkedWarning"]);
                 throw new SequenceEntityFailedException(Loc.Instance["LblTelescopeParkedWarning"]);
             }
@@ -250,7 +251,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
             }
             finally
             {
-                DynamicSequencer.logger.Debug("CenterAndRotate: set memory");
+                DynamicSequencer.logger.Information("CenterAndRotate: complete, set memory");
 
                 DynamicSequencer.currentProject = project.ToString();
                 DynamicSequencer.currentTarget = target.ToString();

@@ -97,7 +97,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
                 {
                     if (target.mechanicalRotation < 0)
                     {
-                        DynamicSequencer.logger.Debug($"Flat: '{project.name}' - '{target.name}' does not contain rotation info, skipped");
+                        DynamicSequencer.logger.Warning($"Flat: '{project.name}' - '{target.name}' does not contain rotation info, skipped");
 
                         continue;
                     }

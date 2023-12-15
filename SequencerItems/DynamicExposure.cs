@@ -145,7 +145,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
                     DynamicSequencer.logger.Debug("Exposure: project complete");
 
                     project.active = false;
-                    project.takeFlats = true;
+                    if (project.flatAmount > 0) project.takeFlats = true;
                 }
                 planner.WriteFiles();
 

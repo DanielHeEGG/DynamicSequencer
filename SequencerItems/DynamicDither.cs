@@ -80,15 +80,13 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
 
             if (project.ditherEvery <= 0)
             {
-                DynamicSequencer.logger.Debug("Dither: project disabled dither, skipped");
-
+                DynamicSequencer.logger.Information("Dither: project disabled dither, skipped");
                 return Task.CompletedTask;
             }
 
             if (!DynamicSequencer.ditherLog.ContainsKey(exposure.ToString()))
             {
-                DynamicSequencer.logger.Debug("Dither: exposure not in ditherLog, skipped");
-
+                DynamicSequencer.logger.Information("Dither: exposure not in ditherLog, skipped");
                 return Task.CompletedTask;
             }
 
@@ -96,7 +94,6 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
             if (exposureCount < project.ditherEvery)
             {
                 DynamicSequencer.logger.Information($"Dither: exposure count {exposureCount}/{project.ditherEvery}, skipped");
-
                 return Task.CompletedTask;
             }
 
