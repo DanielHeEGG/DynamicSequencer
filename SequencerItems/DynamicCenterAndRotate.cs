@@ -125,7 +125,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
                 throw new SequenceItemSkippedException("Skipping DynamicCenterAndRotate - No valid target");
             }
 
-            if (project.ToString() == DynamicSequencer.previousProject && target.ToString() == DynamicSequencer.previousTarget)
+            if (project.ToString() == DynamicSequencer.currentProject && target.ToString() == DynamicSequencer.currentTarget)
             {
                 DynamicSequencer.logger.Information("CenterAndRotate: same target, skipped");
 
@@ -252,8 +252,8 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
             {
                 DynamicSequencer.logger.Debug("CenterAndRotate: set memory");
 
-                DynamicSequencer.previousProject = project.ToString();
-                DynamicSequencer.previousTarget = target.ToString();
+                DynamicSequencer.currentProject = project.ToString();
+                DynamicSequencer.currentTarget = target.ToString();
                 DynamicSequencer.ditherLog.Clear();
 
                 if (stoppedGuiding)

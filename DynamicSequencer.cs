@@ -26,8 +26,8 @@ namespace DanielHeEGG.NINA.DynamicSequencer
 
         public static readonly string settingsFile = Path.Combine(pluginDir, "settings.json");
 
-        public static string previousProject = "";
-        public static string previousTarget = "";
+        public static string currentProject = "";
+        public static string currentTarget = "";
         public static Dictionary<string, int> ditherLog = new Dictionary<string, int>();
 
         public static ILogger logger;

@@ -143,6 +143,15 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
             return null;
         }
 
+        public PExposure GetExposureFromString(string exposureString)
+        {
+            foreach (PExposure exposure in exposures)
+            {
+                if (exposure.ToString() == exposureString) return exposure;
+            }
+            return null;
+        }
+
         public override string ToString()
         {
             return string.Join("_", name, rightAscension, declination, skyRotation, mechanicalRotation, balanceFilters);

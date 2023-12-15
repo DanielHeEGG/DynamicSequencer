@@ -142,7 +142,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
 
             foreach (PTarget target in targets)
             {
-                if (target.valid && target.ToString() == DynamicSequencer.previousTarget)
+                if (target.valid && target.ToString() == DynamicSequencer.currentTarget)
                 {
                     DynamicSequencer.logger.Debug($"Planner: ---- target '{target.name}' selected (previous target)");
 
@@ -165,6 +165,15 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
 
             DynamicSequencer.logger.Debug($"Planner: ---- no target selected (no valid target)");
 
+            return null;
+        }
+
+        public PTarget getTargetFromString(string targetString)
+        {
+            foreach (PTarget target in targets)
+            {
+                if (target.ToString() == targetString) return target;
+            }
             return null;
         }
 

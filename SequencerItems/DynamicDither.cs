@@ -59,29 +59,23 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
 
             var planner = new Planner();
             planner.Filter(_profileService);
-            var project = planner.Best();
-            if (project == null)
+            var project = planner.GetProjectFromString(DynamicSequencer.currentProject);
+            if (project == null || !project.valid)
             {
-                DynamicSequencer.logger.Warning("Dither: no project");
-
-                Notification.ShowWarning("Skipping DynamicDither - No valid project");
-                throw new SequenceItemSkippedException("Skipping DynamicDither - No valid project");
+                DynamicSequencer.logger.Information("Dither: current project not valid, skipped");
+                return Task.CompletedTask;
             }
-            var target = project.Best();
-            if (target == null)
+            var target = project.getTargetFromString(DynamicSequencer.currentTarget);
+            if (target == null || !target.valid)
             {
-                DynamicSequencer.logger.Warning("Dither: no target");
-
-                Notification.ShowWarning("Skipping DynamicDither - No valid target");
-                throw new SequenceItemSkippedException("Skipping DynamicDither - No valid target");
+                DynamicSequencer.logger.Information("Dither: current target not valid, skipped");
+                return Task.CompletedTask;
             }
             var exposure = target.Best();
             if (exposure == null)
             {
-                DynamicSequencer.logger.Warning("Dither: no exposure");
-
-                Notification.ShowWarning("Skipping DynamicDither - No valid exposure");
-                throw new SequenceItemSkippedException("Skipping DynamicDither - No valid exposure");
+                DynamicSequencer.logger.Information("Dither: no valid exposure, skipped");
+                return Task.CompletedTask;
             }
 
             if (project.ditherEvery <= 0)

@@ -31,8 +31,8 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
         {
             DynamicSequencer.logger.Information("ResetMemory");
 
-            DynamicSequencer.previousProject = "";
-            DynamicSequencer.previousTarget = "";
+            DynamicSequencer.currentProject = "";
+            DynamicSequencer.currentTarget = "";
             DynamicSequencer.ditherLog.Clear();
 
             return Task.CompletedTask;

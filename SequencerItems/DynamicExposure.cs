@@ -91,29 +91,23 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
 
             var planner = new Planner();
             planner.Filter(_profileService);
-            var project = planner.Best();
-            if (project == null)
+            var project = planner.GetProjectFromString(DynamicSequencer.currentProject);
+            if (project == null || !project.valid)
             {
-                DynamicSequencer.logger.Warning("Exposure: no project");
-
-                Notification.ShowWarning("Skipping DynamicExposure - No valid project");
-                throw new SequenceItemSkippedException("Skipping DynamicExposure - No valid project");
+                DynamicSequencer.logger.Information("Exposure: current project not valid, skipped");
+                return;
             }
-            var target = project.Best();
-            if (target == null)
+            var target = project.getTargetFromString(DynamicSequencer.currentTarget);
+            if (target == null || !target.valid)
             {
-                DynamicSequencer.logger.Warning("Exposure: no target");
-
-                Notification.ShowWarning("Skipping DynamicExposure - No valid target");
-                throw new SequenceItemSkippedException("Skipping DynamicExposure - No valid target");
+                DynamicSequencer.logger.Information("Exposure: current target not valid, skipped");
+                return;
             }
             var exposure = target.Best();
             if (exposure == null)
             {
-                DynamicSequencer.logger.Warning("Exposure: no exposure");
-
-                Notification.ShowWarning("Skipping DynamicExposure - No valid exposure");
-                throw new SequenceItemSkippedException("Skipping DynamicExposure - No valid exposure");
+                DynamicSequencer.logger.Information("Exposure: no valid exposure, skipped");
+                return;
             }
 
             var capture = new CaptureSequence()
@@ -197,24 +191,12 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
         {
             var planner = new Planner();
             planner.Filter(_profileService);
-            var project = planner.Best();
-            if (project == null)
-            {
-                Notification.ShowWarning("Skipping DynamicExposure - No valid project");
-                throw new SequenceItemSkippedException("Skipping DynamicExposure - No valid project");
-            }
-            var target = project.Best();
-            if (target == null)
-            {
-                Notification.ShowWarning("Skipping DynamicExposure - No valid target");
-                throw new SequenceItemSkippedException("Skipping DynamicExposure - No valid target");
-            }
+            var project = planner.GetProjectFromString(DynamicSequencer.currentProject);
+            if (project == null || !project.valid) return TimeSpan.FromSeconds(1);
+            var target = project.getTargetFromString(DynamicSequencer.currentTarget);
+            if (target == null || !target.valid) return TimeSpan.FromSeconds(1);
             var exposure = target.Best();
-            if (exposure == null)
-            {
-                Notification.ShowWarning("Skipping DynamicExposure - No valid exposure");
-                throw new SequenceItemSkippedException("Skipping DynamicExposure - No valid exposure");
-            }
+            if (exposure == null) return TimeSpan.FromSeconds(1);
 
             return TimeSpan.FromSeconds(exposure.exposureTime);
         }

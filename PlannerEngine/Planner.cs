@@ -95,7 +95,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
 
             foreach (PProject project in _projects)
             {
-                if (project.valid && project.ToString() == DynamicSequencer.previousProject)
+                if (project.valid && project.ToString() == DynamicSequencer.currentProject)
                 {
                     DynamicSequencer.logger.Debug($"Planner: project '{project.name}' selected (previous project)");
 
@@ -118,6 +118,15 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
 
             DynamicSequencer.logger.Debug($"Planner: no project selected (no valid project)");
 
+            return null;
+        }
+
+        public PProject GetProjectFromString(string projectString)
+        {
+            foreach (PProject project in _projects)
+            {
+                if (project.ToString() == projectString) return project;
+            }
             return null;
         }
     }
