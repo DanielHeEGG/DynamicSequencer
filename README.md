@@ -199,6 +199,13 @@ An example sequence:
 ![ExampleSequence](resources/ExampleSequence.png)
 
 ## Changelog
+### v3.3.0.0
+- Bumped to .NET 8 to target NINA 3.0.0.1085-nightly
+- Project coordinates property now use J2000 epoch
+- Normal (non-debug) log files are now slightly more detailed
+- Fixed 180 degree rotation logic
+- Fixed potential target mismatch between DynamicCenterAndRotate and DynamicExposure
+
 ### v3.2.0.0
 - Projects are now located under `Documents\DynamicSequencer\Projects`
 - Added `settings.json` file

@@ -16,9 +16,9 @@ jobs:
       - run: msbuild.exe DynamicSequencer.sln /p:platform="Any CPU" /p:configuration="Release"
       - run: git clone https://bitbucket.org/Isbeorn/nina.plugin.manifests.git manifest
       - shell: pwsh
-        run: manifest/tools/CreateNET7Manifest.ps1 -file bin/Release/net7.0-windows/DanielHeEGG.NINA.DynamicSequencer.dll -installerUrl https://github.com/DanielHeEGG/DynamicSequencer/releases/download/${{ github.ref_name }}/DanielHeEGG.NINA.DynamicSequencer.dll
+        run: manifest/tools/CreateNET7Manifest.ps1 -file bin/Release/net8.0-windows7.0/DanielHeEGG.NINA.DynamicSequencer.dll -installerUrl https://github.com/DanielHeEGG/DynamicSequencer/releases/download/${{ github.ref_name }}/DanielHeEGG.NINA.DynamicSequencer.dll
       - uses: softprops/action-gh-release@v1
         with:
           files: |
-            bin/Release/net7.0-windows/DanielHeEGG.NINA.DynamicSequencer.dll
+            bin/Release/net8.0-windows7.0/DanielHeEGG.NINA.DynamicSequencer.dll
             manifest.json
