@@ -103,17 +103,24 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
                 }
             }
 
-            _projects.Sort(delegate (PProject x, PProject y)
+            // valid projects placed by reference in separate list to preserve the order in "_projects"
+            List<PProject> validProjects = new List<PProject>();
+            foreach (PProject project in _projects)
             {
-                int prioValid = Convert.ToInt32(y.valid) - Convert.ToInt32(x.valid);
-                return prioValid == 0 ? (x.priority == y.priority ? (int)((y.completion - x.completion) * 1000) : x.priority - y.priority) : prioValid;
+                if (project.valid) validProjects.Add(project);
+            }
+
+            validProjects.Sort(delegate (PProject x, PProject y)
+            {
+                if (x.priority != y.priority) return x.priority - y.priority;
+                return (int)((y.completion - x.completion) * 1000);
             });
 
-            if (_projects[0].valid)
+            if (validProjects.Count != 0 && validProjects[0].valid)
             {
-                DynamicSequencer.logger.Debug($"Planner: project '{_projects[0].name}' selected (best project)");
+                DynamicSequencer.logger.Debug($"Planner: project '{validProjects[0].name}' selected (best project)");
 
-                return _projects[0];
+                return validProjects[0];
             }
 
             DynamicSequencer.logger.Debug($"Planner: no project selected (no valid project)");

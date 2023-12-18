@@ -122,20 +122,27 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
                 return null;
             }
 
-            exposures.Sort(delegate (PExposure x, PExposure y)
+            // valid exposures placed by reference in separate list to preserve the order in "exposures"
+            List<PExposure> validExposures = new List<PExposure>();
+            foreach (PExposure exposure in exposures)
             {
-                int prioValid = Convert.ToInt32(y.valid) - Convert.ToInt32(x.valid);
+                if (exposure.valid) validExposures.Add(exposure);
+            }
+
+            validExposures.Sort(delegate (PExposure x, PExposure y)
+            {
                 double prioMoonSep = y.moonSeparationAngle * y.moonSeparationWidth - x.moonSeparationAngle * x.moonSeparationWidth;
                 double prioProgress = balanceFilters ? x.completion - y.completion : y.completion - x.completion;
 
-                return prioValid == 0 ? (prioMoonSep == 0 ? (int)(prioProgress * 1000) : (int)(prioMoonSep * 1000)) : prioValid;
+                if (prioMoonSep != 0) return (int)(prioMoonSep * 1000);
+                return (int)(prioProgress * 1000);
             });
 
-            if (exposures[0].valid)
+            if (validExposures.Count != 0 && validExposures[0].valid)
             {
-                DynamicSequencer.logger.Debug($"Planner: ---- ---- exposure '{exposures[0].filter}' selected (best exposure)");
+                DynamicSequencer.logger.Debug($"Planner: ---- ---- exposure '{validExposures[0].filter}' selected (best exposure)");
 
-                return exposures[0];
+                return validExposures[0];
             }
 
             DynamicSequencer.logger.Debug($"Planner: ---- ---- no exposure selected (no valid exposure)");

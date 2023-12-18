@@ -150,17 +150,24 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
                 }
             }
 
-            targets.Sort(delegate (PTarget x, PTarget y)
+            // valid targets placed by reference in separate list to preserve the order in "targets"
+            List<PTarget> validTargets = new List<PTarget>();
+            foreach (PTarget target in targets)
             {
-                int prioValid = Convert.ToInt32(y.valid) - Convert.ToInt32(x.valid);
-                return prioValid == 0 ? (balanceTargets ? (int)((x.completion - y.completion) * 1000) : (int)((y.completion - x.completion) * 1000)) : prioValid;
+                if (target.valid) validTargets.Add(target);
+            }
+
+            validTargets.Sort(delegate (PTarget x, PTarget y)
+            {
+                if (balanceTargets) return (int)((x.completion - y.completion) * 1000);
+                return (int)((y.completion - x.completion) * 1000);
             });
 
-            if (targets[0].valid)
+            if (validTargets.Count != 0 && validTargets[0].valid)
             {
-                DynamicSequencer.logger.Debug($"Planner: ---- target '{targets[0].name}' selected (best target)");
+                DynamicSequencer.logger.Debug($"Planner: ---- target '{validTargets[0].name}' selected (best target)");
 
-                return targets[0];
+                return validTargets[0];
             }
 
             DynamicSequencer.logger.Debug($"Planner: ---- no target selected (no valid target)");
