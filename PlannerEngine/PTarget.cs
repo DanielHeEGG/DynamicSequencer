@@ -13,13 +13,13 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
     [JsonObject(MemberSerialization.OptOut)]
     public class PTarget
     {
-        public string name { get; set; }
-        public double rightAscension { get; set; }
-        public double declination { get; set; }
-        public double skyRotation { get; set; }
-        public double mechanicalRotation { get; set; }
+        public string name { get; set; } = "Default Target";
+        public double rightAscension { get; set; } = 0;
+        public double declination { get; set; } = 0;
+        public double skyRotation { get; set; } = 0;
+        public double mechanicalRotation { get; set; } = -1;
         public List<PExposureSelectionPriority> exposureSelectionPriority { get; set; } = [PExposureSelectionPriority.SELECTIVITY, PExposureSelectionPriority.N_COMPLETION];
-        public List<PExposure> exposures { get; set; }
+        public List<PExposure> exposures { get; set; } = [new PExposure()];
 
         [JsonIgnore]
         public bool valid

@@ -14,19 +14,19 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
     [JsonObject(MemberSerialization.OptOut)]
     public class PProject
     {
-        public string name { get; set; }
-        public bool active { get; set; }
-        public int priority { get; set; }
-        public int ditherEvery { get; set; }
-        public double minimumAltitude { get; set; }
-        public double horizonOffset { get; set; }
-        public bool centerTargets { get; set; }
-        public bool useMechanicalRotation { get; set; }
-        public bool takeFlats { get; set; }
-        public int flatAmount { get; set; }
-        public Grader imageGrader { get; set; }
+        public string name { get; set; } = "Default Project";
+        public bool active { get; set; } = true;
+        public int priority { get; set; } = 0;
+        public int ditherEvery { get; set; } = 1;
+        public double minimumAltitude { get; set; } = 0;
+        public double horizonOffset { get; set; } = 0;
+        public bool centerTargets { get; set; } = true;
+        public bool useMechanicalRotation { get; set; } = false;
+        public bool takeFlats { get; set; } = false;
+        public int flatAmount { get; set; } = 0;
+        public Grader imageGrader { get; set; } = new Grader();
         public List<PTargetSelectionPriority> targetSelectionPriority { get; set; } = [PTargetSelectionPriority.COMPLETION, PTargetSelectionPriority.ALTITUDE];
-        public List<PTarget> targets { get; set; }
+        public List<PTarget> targets { get; set; } = [new PTarget()];
 
         [JsonIgnore]
         public string filename { get; set; }

@@ -10,15 +10,15 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
     [JsonObject(MemberSerialization.OptOut)]
     public class PExposure
     {
-        public string filter { get; set; }
-        public double exposureTime { get; set; }
-        public int gain { get; set; }
-        public int offset { get; set; }
-        public int binning { get; set; }
-        public double moonSeparationAngle { get; set; }
-        public int moonSeparationWidth { get; set; }
-        public int requiredAmount { get; set; }
-        public int acceptedAmount { get; set; }
+        public string filter { get; set; } = "";
+        public double exposureTime { get; set; } = 60;
+        public int gain { get; set; } = 0;
+        public int offset { get; set; } = 0;
+        public int binning { get; set; } = 1;
+        public double moonSeparationAngle { get; set; } = 0;
+        public int moonSeparationWidth { get; set; } = 0;
+        public int requiredAmount { get; set; } = 0;
+        public int acceptedAmount { get; set; } = 0;
 
         [JsonIgnore]
         public bool valid { get; set; }

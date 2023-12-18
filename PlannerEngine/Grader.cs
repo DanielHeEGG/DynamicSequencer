@@ -7,9 +7,9 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
     [JsonObject(MemberSerialization.OptOut)]
     public class Grader
     {
-        public int minStars { get; set; }
-        public double maxHFR { get; set; }
-        public double maxGuideError { get; set; }
+        public int minStars { get; set; } = -1;
+        public double maxHFR { get; set; } = 100;
+        public double maxGuideError { get; set; } = 100;
 
         public bool GradeImage(IImageData imageData)
         {
