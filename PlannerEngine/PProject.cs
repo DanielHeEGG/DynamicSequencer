@@ -170,6 +170,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
             {
                 int prioCompletion = (int)((y.completion - x.completion) * 1000);
                 int prioAltitude = (int)((AstrometryUtils.GetAltitude(location, y.rightAscension, y.declination, time) - AstrometryUtils.GetAltitude(location, x.rightAscension, x.declination, time)) * 1000);
+                int prioMoonSeparation = (int)((AstrometryUtils.GetMoonSeparation(location, y.rightAscension, y.declination, time) - AstrometryUtils.GetMoonSeparation(location, x.rightAscension, x.declination, time)) * 1000);
                 foreach (PTargetSelectionPriority item in targetSelectionPriority)
                 {
                     switch (item)
@@ -185,6 +186,12 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
                             continue;
                         case PTargetSelectionPriority.N_ALTITUDE:
                             if (prioAltitude != 0) return -prioAltitude;
+                            continue;
+                        case PTargetSelectionPriority.MOON_SEPARATION:
+                            if (prioMoonSeparation != 0) return prioMoonSeparation;
+                            continue;
+                        case PTargetSelectionPriority.N_MOON_SEPARATION:
+                            if (prioMoonSeparation != 0) return -prioMoonSeparation;
                             continue;
                         default:
                             return 0;
@@ -230,6 +237,10 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
         [EnumMember(Value = "ALTITUDE")]
         ALTITUDE,
         [EnumMember(Value = "N_ALTITUDE")]
-        N_ALTITUDE
+        N_ALTITUDE,
+        [EnumMember(Value = "MOON_SEPARATION")]
+        MOON_SEPARATION,
+        [EnumMember(Value = "N_MOON_SEPARATION")]
+        N_MOON_SEPARATION
     }
 }
