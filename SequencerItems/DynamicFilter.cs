@@ -72,7 +72,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
                 DynamicSequencer.logger.Information("Filter: current target not valid, skipped");
                 return;
             }
-            var exposure = target.Best();
+            var exposure = target.Best(_profileService);
             if (exposure == null)
             {
                 DynamicSequencer.logger.Information("Filter: no valid exposure, skipped");

@@ -71,7 +71,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
                 DynamicSequencer.logger.Information("Dither: current target not valid, skipped");
                 return Task.CompletedTask;
             }
-            var exposure = target.Best();
+            var exposure = target.Best(_profileService);
             if (exposure == null)
             {
                 DynamicSequencer.logger.Information("Dither: no valid exposure, skipped");

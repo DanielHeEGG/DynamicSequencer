@@ -45,7 +45,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
             {
                 Planner planner = new Planner();
                 planner.Filter(_profileService);
-                if (planner.Best() != null)
+                if (planner.Best(_profileService) != null)
                 {
                     break;
                 }

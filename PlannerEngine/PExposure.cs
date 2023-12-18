@@ -1,4 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using System.Runtime.Serialization;
+
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 using NINA.Core.Model.Equipment;
 

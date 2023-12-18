@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 using NINA.Astrometry;
 using NINA.Profile.Interfaces;
@@ -16,7 +18,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
         public double declination { get; set; }
         public double skyRotation { get; set; }
         public double mechanicalRotation { get; set; }
-        public bool balanceFilters { get; set; }
+        public List<PExposureSelectionPriority> exposureSelectionPriority { get; set; } = [PExposureSelectionPriority.SELECTIVITY, PExposureSelectionPriority.N_COMPLETION];
         public List<PExposure> exposures { get; set; }
 
         [JsonIgnore]
@@ -113,7 +115,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
             }
         }
 
-        public PExposure Best()
+        public PExposure Best(IProfileService profileService)
         {
             if (exposures.Count == 0)
             {
@@ -131,11 +133,29 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
 
             validExposures.Sort(delegate (PExposure x, PExposure y)
             {
-                double prioMoonSep = y.moonSeparationAngle * y.moonSeparationWidth - x.moonSeparationAngle * x.moonSeparationWidth;
-                double prioProgress = balanceFilters ? x.completion - y.completion : y.completion - x.completion;
-
-                if (prioMoonSep != 0) return (int)(prioMoonSep * 1000);
-                return (int)(prioProgress * 1000);
+                int prioCompletion = (int)((y.completion - x.completion) * 1000);
+                int prioSelectivity = (int)(y.moonSeparationAngle * y.moonSeparationWidth - x.moonSeparationAngle * x.moonSeparationWidth);
+                foreach (PExposureSelectionPriority item in exposureSelectionPriority)
+                {
+                    switch (item)
+                    {
+                        case PExposureSelectionPriority.COMPLETION:
+                            if (prioCompletion != 0) return prioCompletion;
+                            continue;
+                        case PExposureSelectionPriority.N_COMPLETION:
+                            if (prioCompletion != 0) return -prioCompletion;
+                            continue;
+                        case PExposureSelectionPriority.SELECTIVITY:
+                            if (prioSelectivity != 0) return prioSelectivity;
+                            continue;
+                        case PExposureSelectionPriority.N_SELECTIVITY:
+                            if (prioSelectivity != 0) return -prioSelectivity;
+                            continue;
+                        default:
+                            return 0;
+                    }
+                }
+                return 0;
             });
 
             if (validExposures.Count != 0 && validExposures[0].valid)
@@ -161,7 +181,20 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
 
         public override string ToString()
         {
-            return string.Join("_", name, rightAscension, declination, skyRotation, mechanicalRotation, balanceFilters);
+            return string.Join("_", name, rightAscension, declination, skyRotation, mechanicalRotation, exposureSelectionPriority);
         }
+    }
+
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum PExposureSelectionPriority
+    {
+        [EnumMember(Value = "COMPLETION")]
+        COMPLETION,
+        [EnumMember(Value = "N_COMPLETION")]
+        N_COMPLETION,
+        [EnumMember(Value = "SELECTIVITY")]
+        SELECTIVITY,
+        [EnumMember(Value = "N_SELECTIVITY")]
+        N_SELECTIVITY
     }
 }

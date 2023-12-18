@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 using NINA.Astrometry;
 using NINA.Core.Model;
@@ -18,12 +20,12 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
         public int ditherEvery { get; set; }
         public double minimumAltitude { get; set; }
         public double horizonOffset { get; set; }
-        public bool balanceTargets { get; set; }
         public bool centerTargets { get; set; }
         public bool useMechanicalRotation { get; set; }
         public bool takeFlats { get; set; }
         public int flatAmount { get; set; }
         public Grader imageGrader { get; set; }
+        public List<PTargetSelectionPriority> targetSelectionPriority { get; set; } = [PTargetSelectionPriority.COMPLETION, PTargetSelectionPriority.ALTITUDE];
         public List<PTarget> targets { get; set; }
 
         [JsonIgnore]
@@ -131,8 +133,15 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
             }
         }
 
-        public PTarget Best()
+        public PTarget Best(IProfileService profileService)
         {
+            DateTime time = DateTime.Now;
+
+            ObserverInfo location = new ObserverInfo();
+            location.Latitude = profileService.ActiveProfile.AstrometrySettings.Latitude;
+            location.Longitude = profileService.ActiveProfile.AstrometrySettings.Longitude;
+            location.Elevation = profileService.ActiveProfile.AstrometrySettings.Elevation;
+
             if (targets.Count == 0)
             {
                 DynamicSequencer.logger.Debug($"Planner: ---- no target selected (empty list)");
@@ -159,8 +168,29 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
 
             validTargets.Sort(delegate (PTarget x, PTarget y)
             {
-                if (balanceTargets) return (int)((x.completion - y.completion) * 1000);
-                return (int)((y.completion - x.completion) * 1000);
+                int prioCompletion = (int)((y.completion - x.completion) * 1000);
+                int prioAltitude = (int)((AstrometryUtils.GetAltitude(location, y.rightAscension, y.declination, time) - AstrometryUtils.GetAltitude(location, x.rightAscension, x.declination, time)) * 1000);
+                foreach (PTargetSelectionPriority item in targetSelectionPriority)
+                {
+                    switch (item)
+                    {
+                        case PTargetSelectionPriority.COMPLETION:
+                            if (prioCompletion != 0) return prioCompletion;
+                            continue;
+                        case PTargetSelectionPriority.N_COMPLETION:
+                            if (prioCompletion != 0) return -prioCompletion;
+                            continue;
+                        case PTargetSelectionPriority.ALTITUDE:
+                            if (prioAltitude != 0) return prioAltitude;
+                            continue;
+                        case PTargetSelectionPriority.N_ALTITUDE:
+                            if (prioAltitude != 0) return -prioAltitude;
+                            continue;
+                        default:
+                            return 0;
+                    }
+                }
+                return 0;
             });
 
             if (validTargets.Count != 0 && validTargets[0].valid)
@@ -186,7 +216,20 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
 
         public override string ToString()
         {
-            return string.Join("_", name, active, priority, ditherEvery, minimumAltitude, horizonOffset, balanceTargets, centerTargets, useMechanicalRotation, imageGrader);
+            return string.Join("_", name, active, priority, ditherEvery, minimumAltitude, horizonOffset, centerTargets, useMechanicalRotation, imageGrader, targetSelectionPriority);
         }
+    }
+
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum PTargetSelectionPriority
+    {
+        [EnumMember(Value = "COMPLETION")]
+        COMPLETION,
+        [EnumMember(Value = "N_COMPLETION")]
+        N_COMPLETION,
+        [EnumMember(Value = "ALTITUDE")]
+        ALTITUDE,
+        [EnumMember(Value = "N_ALTITUDE")]
+        N_ALTITUDE
     }
 }

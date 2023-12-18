@@ -55,18 +55,20 @@ namespace DanielHeEGG.NINA.DynamicSequencer
                 using (StreamReader r = File.OpenText(settingsFile))
                 {
                     JsonSerializer serializer = new JsonSerializer();
+                    serializer.ObjectCreationHandling = ObjectCreationHandling.Replace;
                     pluginSettings = (PluginSettings)serializer.Deserialize(r, typeof(PluginSettings));
                 }
             }
             else
             {
                 pluginSettings = new PluginSettings();
-                using (StreamWriter w = new StreamWriter(settingsFile))
-                {
-                    JsonSerializer serializer = new JsonSerializer();
-                    serializer.Formatting = Formatting.Indented;
-                    serializer.Serialize(w, pluginSettings);
-                }
+            }
+
+            using (StreamWriter w = new StreamWriter(settingsFile))
+            {
+                JsonSerializer serializer = new JsonSerializer();
+                serializer.Formatting = Formatting.Indented;
+                serializer.Serialize(w, pluginSettings);
             }
 
             LoggerConfiguration loggerConfig = new LoggerConfiguration().MinimumLevel.Debug().WriteTo.File(Path.Combine(logDir, "log-.txt"), rollingInterval: RollingInterval.Day, restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information);

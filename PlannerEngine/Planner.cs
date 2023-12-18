@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization;
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 using NINA.Astrometry;
 using NINA.Profile.Interfaces;
@@ -22,6 +24,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
                 using (StreamReader r = File.OpenText(filename))
                 {
                     JsonSerializer serializer = new JsonSerializer();
+                    serializer.ObjectCreationHandling = ObjectCreationHandling.Replace;
                     PProject project = (PProject)serializer.Deserialize(r, typeof(PProject));
                     project.filename = filename;
                     _projects.Add(project);
@@ -84,7 +87,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
             }
         }
 
-        public PProject Best()
+        public PProject Best(IProfileService profileService)
         {
             if (_projects.Count == 0)
             {
@@ -112,8 +115,26 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
 
             validProjects.Sort(delegate (PProject x, PProject y)
             {
-                if (x.priority != y.priority) return x.priority - y.priority;
-                return (int)((y.completion - x.completion) * 1000);
+                int prioPriority = x.priority - y.priority;
+                int prioCompletion = (int)((y.completion - x.completion) * 1000);
+                foreach (PProjectSelectionPriority item in DynamicSequencer.pluginSettings.projectSelectionPriority)
+                {
+                    switch (item)
+                    {
+                        case PProjectSelectionPriority.PRIORITY:
+                            if (prioPriority != 0) return prioPriority;
+                            continue;
+                        case PProjectSelectionPriority.COMPLETION:
+                            if (prioCompletion != 0) return prioCompletion;
+                            continue;
+                        case PProjectSelectionPriority.N_COMPLETION:
+                            if (prioCompletion != 0) return -prioCompletion;
+                            continue;
+                        default:
+                            return 0;
+                    }
+                }
+                return 0;
             });
 
             if (validProjects.Count != 0 && validProjects[0].valid)
@@ -136,5 +157,16 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
             }
             return null;
         }
+    }
+
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum PProjectSelectionPriority
+    {
+        [EnumMember(Value = "PRIORITY")]
+        PRIORITY,
+        [EnumMember(Value = "COMPLETION")]
+        COMPLETION,
+        [EnumMember(Value = "N_COMPLETION")]
+        N_COMPLETION
     }
 }

@@ -103,7 +103,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
                 DynamicSequencer.logger.Information("Exposure: current target not valid, skipped");
                 return;
             }
-            var exposure = target.Best();
+            var exposure = target.Best(_profileService);
             if (exposure == null)
             {
                 DynamicSequencer.logger.Information("Exposure: no valid exposure, skipped");
@@ -195,7 +195,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
             if (project == null || !project.valid) return TimeSpan.FromSeconds(1);
             var target = project.getTargetFromString(DynamicSequencer.currentTarget);
             if (target == null || !target.valid) return TimeSpan.FromSeconds(1);
-            var exposure = target.Best();
+            var exposure = target.Best(_profileService);
             if (exposure == null) return TimeSpan.FromSeconds(1);
 
             return TimeSpan.FromSeconds(exposure.exposureTime);

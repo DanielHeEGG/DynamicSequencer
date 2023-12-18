@@ -108,7 +108,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
 
             var planner = new Planner();
             planner.Filter(_profileService);
-            var project = planner.Best();
+            var project = planner.Best(_profileService);
             if (project == null)
             {
                 DynamicSequencer.logger.Warning("CenterAndRotate: no project");
@@ -116,7 +116,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
                 Notification.ShowWarning("Skipping DynamicCenterAndRotate - No valid project");
                 throw new SequenceItemSkippedException("Skipping DynamicCenterAndRotate - No valid project");
             }
-            var target = project.Best();
+            var target = project.Best(_profileService);
             if (target == null)
             {
                 DynamicSequencer.logger.Warning("CenterAndRotate: no target");
