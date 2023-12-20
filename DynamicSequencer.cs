@@ -4,6 +4,8 @@ using System.ComponentModel.Composition;
 using System.IO;
 using System.Threading.Tasks;
 
+using DanielHeEGG.NINA.DynamicSequencer.PlannerEngine;
+
 using Newtonsoft.Json;
 
 using NINA.Core.Utility;
@@ -73,6 +75,10 @@ namespace DanielHeEGG.NINA.DynamicSequencer
 
             LoggerConfiguration loggerConfig = new LoggerConfiguration().MinimumLevel.Debug().WriteTo.File(Path.Combine(logDir, "log-.txt"), rollingInterval: RollingInterval.Day, restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information);
             logger = pluginSettings.logDebug ? loggerConfig.WriteTo.File(Path.Combine(logDir, "debug_log-.txt"), rollingInterval: RollingInterval.Day, restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Debug).CreateLogger() : loggerConfig.CreateLogger();
+
+            logger.Information("Startup: reading all project files");
+            Planner planner = new Planner();
+            planner.WriteFiles();
         }
 
         public override Task Teardown()
