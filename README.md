@@ -251,6 +251,12 @@ An example sequence:
 
 
 ## Changelog
+### v3.4.0.0
+- Replaced target selection priority logic
+- Added new moon separation priority criterion
+- Targets and exposures list order within project JSON files is now static
+- Project JSON files now have default values
+
 ### v3.3.0.0
 - Bumped to .NET 8 to target NINA 3.0.0.1085-nightly
 - Project coordinates property now use J2000 epoch
