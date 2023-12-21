@@ -33,7 +33,7 @@ Global plugin settings are located in the `settings.json` file. Settings are lis
 
 | Property | Type | Description | Default Value |
 | --- | --- | --- | --- |
-| name | string | Name of the project | `"Default Project` |
+| name | string | Name of the project | `"Default Project"` |
 | active | bool | Project is active when `true`. Automatically set to `false` when a project is completed. | `false` |
 | priority | int | Project priority, lower number is higher priority. | `0` |
 | ditherEvery | int | Amount of frames to take of each filter before dithering. Set to `0` to disable. | `1` |
@@ -48,7 +48,7 @@ Global plugin settings are located in the `settings.json` file. Settings are lis
 | imageGrader.maxGuideError | double | Maximum guiding RMS error (in pixels) for a frame to pass. | `100.0` |
 | targetSelectionPriority | list | Criteria for selecting the best target. See `Notes on Automatic Target Selection` below. | `[ "COMPLETION", "ALTITUDE" ]` |
 | targets | list | | |
-| targets.name | string | Name of the target | `Default Target` |
+| targets.name | string | Name of the target | `"Default Target"` |
 | targets.rightAscension | double | RA of the target in degrees, J2000 | `0.0` |
 | targets.declination | double | Dec of the target in degrees, J2000 | `0.0` |
 | targets.skyRotation | double | Sky orientation of the target in degrees. This is ignored when `useMechanicalRotation = true` and when there is a valid mechanical rotation value in `targets.mechanicalRotation` | `0.0` |
