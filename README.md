@@ -271,6 +271,10 @@ An example sequence:
 
 
 ## Changelog
+### v3.5.0.0
+- Now targeting NINA 3.0.0.3005-rc
+- Redesigned dynamic flat system
+
 ### v3.4.0.0
 - Replaced target selection priority logic
 - Added new moon separation priority criterion
