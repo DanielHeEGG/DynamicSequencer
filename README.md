@@ -41,8 +41,9 @@ Global plugin settings are located in the `settings.json` file. Settings are lis
 | horizonOffset | double | Minimum altitude (in degrees) above the custom horizon of a target for it to be considered. Disabled if no custom horizon file exists. | `0.0` |
 | centerTargets | bool | When set to `false`, `DS: Center and Rotate` will skip centering and will only slew then rotate. This may save some time if you have an accurate pointing model. | `true` |
 | useMechanicalRotation | bool | When set to `true`, `DS: Center and Rotate` will save the mechanical rotator position and reuse it instead of platesolving and rotating every time. This saves some time and helps with repeatable flat frames. | `false` |
-| takeFlats | bool | Marks the project for flat frames. This should be set to `false` in most cases. It will be automatically set to `true` by DS upon the completion of a project. Returns to `false` when flat frames are successfully taken. | `false` |
+| flatType | string | Configures when to automatically take flats. See `Notes on Dynamic Flats` below. | `"UPON_PROJECT_COMPLETION"` |
 | flatAmount | int | Amount of flat frames to take, per filter, per target. | `0` |
+| takeFlatsOverride | bool | When set to `true`, the `DS: Take Trained Flats` instruction will take flats regardless of the `flatType` setting. Reverts back to `false` when flats are successfully taken.  | `false` |
 | imageGrader.minStars | int | Minimum amount of stars for a frame to pass. | `-1` |
 | imageGrader.maxHFR | double | Maximum average star HFR (in pixels) for a frame to pass. | `100.0` |
 | imageGrader.maxGuideError | double | Maximum guiding RMS error (in pixels) for a frame to pass. | `100.0` |
@@ -77,8 +78,9 @@ The following project file defines an Andromeda Galaxy LRGBHa project:
   "horizonOffset": 5.0,
   "centerTargets": true,
   "useMechanicalRotation": true,
-  "takeFlats": false,
+  "flatType": "UPON_PROJECT_COMPLETION",
   "flatAmount": 30,
+  "takeFlatsOverride": false,
   "imageGrader": {
     "minStars": 100,
     "maxHFR": 2.0,
@@ -209,6 +211,24 @@ If all listed criteria are the same for all projects, a random project will be c
 > **WARNING** Target selection behavior is undefined if the lists are left blank.
 
 
+### **Notes on Dynamic Flats**
+* DS keeps an internal log of all exposures that have passed image grading to determine which project, target, and/or filter requires flats to be taken. `DS: Take Trained Flats` takes those flats and clears the log.
+* Dynamic flats will only function if *all* of the following prerequisites are satisfied: `flatAmount` greater than zero, `useMechanicalRotation = true`, `target.mechanicalRotation` is a valid value, and trained flat presets are available for the specific filter, gain, and binning. If any of the prerequisites are not met, that particular project / target / exposure will be ignored.
+* Once the criterion specified in the `flatType` field is satisfied, `flatAmount` number of flats will be taken for each applicable project, target, and exposure upon the execution of the `DS: Take Trained Flats` instruction. For example, if `flatType = "UPON_PROJECT_COMPLETION"` and `flatAmount = 30` for a particular project, after the project reaches 100% completion the next time `DS: Take Trained Flats` is executed, 30 flats will be taken for every target and exposure combination in this project.
+* Only one option can be chosen for `flatType`.
+* If `takeFlatsOverride` is set to `true`, `flatAmount` number of flats will be taken for each applicable project, target, and exposure upon the execution of the `DS: Take Trained Flats` instruction regardless.
+
+Options available for `flatType`:
+| Key | Description |
+| --- | --- |
+| UPON_PROJECT_COMPLETION | All target and exposure combinations are added to the flat log when the parent project reaches 100% or more completion. |
+| UPON_TARGET_COMPLETION | All exposures are added to the flat log when the parent target reaches 100% or more completion. |
+| NIGHTLY | All projects, targets, or exposures that received additional data (that passed image grading) are added to the flat log. |
+| NONE | Disables automatic flats. |
+
+> **WARNING** Automatic flat system behavior is undefined if the option is left blank.
+
+
 ### **Notes on Image Grading**
 * Frames that are rejected do not increment the `acceptedAmount` field.
 * There is no option to turn off image grading, it can be effectively disabled by setting the grading criteria such as `"minStars": -1`.
@@ -235,7 +255,7 @@ Switches filter in accordance to the exposure plan selected by the planning engi
 Sends a dither command to the guiding software when conditions are met. Configurable with the `ditherEvery` setting. This instruction will only send a dither command if the number of frames shot in *any filter* since the last dither/slew exceeds the setting. For example, when `ditherEvery = 1`, a series of frames may look something like this: `SHO'SHO'SHO` or `L'L'LRGB'L'L'LRGB`. Or when `ditherEvery = 2` it may look like: `SHOSHO'SHOSHO` or `LL'LRGBL'LLRGB'LL`.
 
 #### `DS: Take Trained Flats`
-Scans all projects for those marked for flat frames. Will only attempt to take flats for a particular project when all of the following prerequisites are met: `takeFlats = true`, `flatAmount` greater than zero, `useMechanicalRotation = true`, `target.mechanicalRotation` is a valid value, and trained flat presets are available for the specific filter, gain, and binning. The instruction will simply be skipped if any of the prerequisites are not met.
+Checks the internal flat log for required flats. Configured with `flatType` and `flatAmount` fields. It is recommended to run this instruction once a day during daytime. The instruction will be skipped if there is nothing to do.
 
 #### `DS: Wait Until Target Available`
 Waits indefinitely until at least one target is returned from the planning engine. Note: the planning engine does not filter for sun altitude, so this should be used along with `Wait if Sun Altitude` or `Wait for Time`.
