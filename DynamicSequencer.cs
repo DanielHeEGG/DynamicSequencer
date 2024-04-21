@@ -31,6 +31,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer
         public static string currentProject = "";
         public static string currentTarget = "";
         public static Dictionary<string, int> ditherLog = new Dictionary<string, int>();
+        public static Dictionary<string, Dictionary<string, List<string>>> flatLog = new Dictionary<string, Dictionary<string, List<string>>>();
 
         public static ILogger logger;
         public static PluginSettings pluginSettings;

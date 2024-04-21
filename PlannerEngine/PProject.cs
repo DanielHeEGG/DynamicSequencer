@@ -22,8 +22,9 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
         public double horizonOffset { get; set; } = 0;
         public bool centerTargets { get; set; } = true;
         public bool useMechanicalRotation { get; set; } = false;
-        public bool takeFlats { get; set; } = false;
+        public FlatType flatType { get; set; } = FlatType.UPON_PROJECT_COMPLETION;
         public int flatAmount { get; set; } = 0;
+        public bool takeFlatsOverride { get; set; } = false;
         public Grader imageGrader { get; set; } = new Grader();
         public List<PTargetSelectionPriority> targetSelectionPriority { get; set; } = [PTargetSelectionPriority.COMPLETION, PTargetSelectionPriority.ALTITUDE];
         public List<PTarget> targets { get; set; } = [new PTarget()];
@@ -223,8 +224,21 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
 
         public override string ToString()
         {
-            return string.Join("_", name, active, priority, ditherEvery, minimumAltitude, horizonOffset, centerTargets, useMechanicalRotation, imageGrader, targetSelectionPriority);
+            return string.Join("_", name, active, priority, ditherEvery, minimumAltitude, horizonOffset, centerTargets, useMechanicalRotation, flatType, flatAmount, imageGrader, targetSelectionPriority);
         }
+    }
+
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum FlatType
+    {
+        [EnumMember(Value = "UPON_PROJECT_COMPLETION")]
+        UPON_PROJECT_COMPLETION,
+        [EnumMember(Value = "UPON_TARGET_COMPLETION")]
+        UPON_TARGET_COMPLETION,
+        [EnumMember(Value = "NIGHTLY")]
+        NIGHTLY,
+        [EnumMember(Value = "NONE")]
+        NONE
     }
 
     [JsonConverter(typeof(StringEnumConverter))]

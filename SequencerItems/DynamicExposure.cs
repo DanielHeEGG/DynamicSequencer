@@ -9,7 +9,6 @@ using DanielHeEGG.NINA.DynamicSequencer.PlannerEngine;
 using NINA.Core.Model;
 using NINA.Core.Model.Equipment;
 using NINA.Core.Utility;
-using NINA.Core.Utility.Notification;
 using NINA.Equipment.Interfaces.Mediator;
 using NINA.Equipment.Model;
 using NINA.Profile.Interfaces;
@@ -140,15 +139,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
 
                 DynamicSequencer.logger.Information($"Exposure: image accepted, progress {exposure.acceptedAmount}/{exposure.requiredAmount}");
 
-                if (project.completion >= 1.0f)
-                {
-                    DynamicSequencer.logger.Debug("Exposure: project complete");
-
-                    project.active = false;
-                    if (project.flatAmount > 0) project.takeFlats = true;
-                }
-                planner.WriteFiles();
-
+                // add to ditherLog
                 if (DynamicSequencer.ditherLog.ContainsKey(exposure.ToString()))
                 {
                     DynamicSequencer.logger.Debug("Exposure: in ditherLog, increment count");
@@ -161,6 +152,87 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
 
                     DynamicSequencer.ditherLog.Add(exposure.ToString(), 1);
                 }
+
+                // NOTE: for flatLog entries, project.useMechanicalRotation and target.mechanicalRotation conditions are checked in DynamicFlats, not here
+                if (project.flatType == FlatType.NIGHTLY)
+                {
+                    // add exposure to filterLog
+                    if (!DynamicSequencer.flatLog.ContainsKey(project.ToString()))
+                    {
+                        DynamicSequencer.logger.Debug($"Exposure: project '{project.name}' not in flatLog, adding");
+                        DynamicSequencer.flatLog.Add(project.ToString(), new Dictionary<string, List<string>>());
+                    }
+                    if (!DynamicSequencer.flatLog[project.ToString()].ContainsKey(target.ToString()))
+                    {
+                        DynamicSequencer.logger.Debug($"Exposure: ---- target '{target.name}' not in flatLog, adding");
+                        DynamicSequencer.flatLog[project.ToString()].Add(target.ToString(), new List<string>());
+                    }
+                    if (!DynamicSequencer.flatLog[project.ToString()][target.ToString()].Contains(exposure.ToString()))
+                    {
+                        DynamicSequencer.logger.Debug($"Exposure: ---- ---- exposure '{exposure.filter}' not in flatLog, adding");
+                        DynamicSequencer.flatLog[project.ToString()][target.ToString()].Add(exposure.ToString());
+                    }
+                }
+                if (target.completion >= 1.0f)
+                {
+                    DynamicSequencer.logger.Debug("Exposure: target complete");
+
+                    if (project.flatType == FlatType.UPON_TARGET_COMPLETION)
+                    {
+                        // add entire target to flatLog
+                        if (!DynamicSequencer.flatLog.ContainsKey(project.ToString()))
+                        {
+                            DynamicSequencer.logger.Debug($"Exposure: project '{project.name}' not in flatLog, adding");
+                            DynamicSequencer.flatLog.Add(project.ToString(), new Dictionary<string, List<string>>());
+                        }
+                        if (!DynamicSequencer.flatLog[project.ToString()].ContainsKey(target.ToString()))
+                        {
+                            DynamicSequencer.logger.Debug($"Exposure: ---- target '{target.name}' not in flatLog, adding");
+                            DynamicSequencer.flatLog[project.ToString()].Add(target.ToString(), new List<string>());
+                        }
+                        foreach (PExposure flatExposure in target.exposures)
+                        {
+                            if (!DynamicSequencer.flatLog[project.ToString()][target.ToString()].Contains(flatExposure.ToString()))
+                            {
+                                DynamicSequencer.logger.Debug($"Exposure: ---- ---- exposure '{flatExposure.filter}' not in flatLog, adding");
+                                DynamicSequencer.flatLog[project.ToString()][target.ToString()].Add(flatExposure.ToString());
+                            }
+                        }
+                    }
+                }
+                if (project.completion >= 1.0f)
+                {
+                    DynamicSequencer.logger.Debug("Exposure: project complete");
+
+                    project.active = false;
+
+                    if (project.flatType == FlatType.UPON_PROJECT_COMPLETION)
+                    {
+                        // add entire project to flatLog
+                        if (!DynamicSequencer.flatLog.ContainsKey(project.ToString()))
+                        {
+                            DynamicSequencer.logger.Debug($"Exposure: project '{project.name}' not in flatLog, adding");
+                            DynamicSequencer.flatLog.Add(project.ToString(), new Dictionary<string, List<string>>());
+                        }
+                        foreach (PTarget flatTarget in project.targets)
+                        {
+                            if (!DynamicSequencer.flatLog[project.ToString()].ContainsKey(flatTarget.ToString()))
+                            {
+                                DynamicSequencer.logger.Debug($"Exposure: ---- target '{flatTarget.name}' not in flatLog, adding");
+                                DynamicSequencer.flatLog[project.ToString()].Add(flatTarget.ToString(), new List<string>());
+                            }
+                            foreach (PExposure flatExposure in flatTarget.exposures)
+                            {
+                                if (!DynamicSequencer.flatLog[project.ToString()][flatTarget.ToString()].Contains(flatExposure.ToString()))
+                                {
+                                    DynamicSequencer.logger.Debug($"Exposure: ---- ---- exposure '{flatExposure.filter}' not in flatLog, adding");
+                                    DynamicSequencer.flatLog[project.ToString()][flatTarget.ToString()].Add(flatExposure.ToString());
+                                }
+                            }
+                        }
+                    }
+                }
+                planner.WriteFiles();
             }
             else
             {

@@ -12,7 +12,6 @@ using NINA.Core.Utility;
 using NINA.Core.Utility.Notification;
 using NINA.Equipment.Interfaces.Mediator;
 using NINA.Equipment.Model;
-using NINA.Profile;
 using NINA.Profile.Interfaces;
 using NINA.Sequencer.SequenceItem;
 using NINA.Sequencer.Validations;
@@ -89,92 +88,54 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
             await _flatDeviceMediator.ToggleLight(true, progress, token);
 
             var planner = new Planner();
+
+            // projects with takeFlatsOverride enabled
             foreach (PProject project in planner._projects)
             {
-                if (!project.takeFlats || project.flatAmount <= 0 || !project.useMechanicalRotation) continue;
+                if (!project.takeFlatsOverride || project.flatAmount <= 0 || !project.useMechanicalRotation) continue;
 
                 foreach (PTarget target in project.targets)
                 {
                     if (target.mechanicalRotation < 0)
                     {
                         DynamicSequencer.logger.Warning($"Flat: '{project.name}' - '{target.name}' does not contain rotation info, skipped");
-
                         continue;
                     }
 
                     foreach (PExposure exposure in target.exposures)
                     {
-                        FilterInfo filter = null;
-                        foreach (FilterInfo filterInfo in _profileService.ActiveProfile.FilterWheelSettings.FilterWheelFilters)
-                        {
-                            if (filterInfo.Name == exposure.filter)
-                            {
-                                filter = filterInfo;
-                                break;
-                            }
-                        }
-                        if (filter == null)
-                        {
-                            DynamicSequencer.logger.Error($"Flat: no matching filter for name '{exposure.filter}', skipped");
-
-                            Notification.ShowWarning($"No matching filter name for {exposure.filter}");
-                            continue;
-                        }
-                        await _filterWheelMediator.ChangeFilter(filter, token, progress);
-
-                        var brightnessInfo = _profileService.ActiveProfile.FlatDeviceSettings.GetTrainedFlatExposureSetting(filter.Position, exposure.binningMode, exposure.gain, exposure.offset);
-                        if (brightnessInfo == null)
-                        {
-                            DynamicSequencer.logger.Error($"Flat: no trained flat exposure for filter '{exposure.filter}', binning {exposure.binning}, gain {exposure.gain}, skipped");
-
-                            Notification.ShowWarning($"No trained flat exposure for filter {exposure.filter}, binning {exposure.binning}, gain {exposure.gain}");
-                            continue;
-                        }
-                        await _flatDeviceMediator.SetBrightness(brightnessInfo.Brightness, progress, token);
-
-                        if (Math.Abs((double)_rotatorMediator.GetInfo().MechanicalPosition - target.mechanicalRotation) > 0.1)
-                        {
-                            DynamicSequencer.logger.Debug($"Flat: rotate to {target.mechanicalRotation}");
-
-                            await _rotatorMediator.MoveMechanical((float)target.mechanicalRotation, token);
-                        }
-
-                        for (int i = 0; i < project.flatAmount; i++)
-                        {
-                            DynamicSequencer.logger.Debug($"Flat: '{project.name}' - '{target.name}' - '{exposure.filter}' progress {i + 1}/{project.flatAmount}");
-
-                            var capture = new CaptureSequence()
-                            {
-                                ExposureTime = brightnessInfo.Time,
-                                Binning = exposure.binningMode,
-                                Gain = exposure.gain,
-                                Offset = exposure.offset,
-                                ImageType = CaptureSequence.ImageTypes.FLAT,
-                                ProgressExposureCount = i,
-                                TotalExposureCount = project.flatAmount
-                            };
-
-                            var exposureData = await _imagingMediator.CaptureImage(capture, token, progress);
-
-                            var imageData = await exposureData.ToImageData(progress, token);
-
-                            var prepareTask = _imagingMediator.PrepareImage(imageData, new PrepareImageParameters(null, false), token);
-
-                            imageData.MetaData.Target.Name = target.name;
-                            imageData.MetaData.Target.Coordinates = target.coordinates;
-                            imageData.MetaData.Target.PositionAngle = target.skyRotation;
-                            imageData.MetaData.Sequence.Title = project.name;
-
-                            await _imageSaveMediator.Enqueue(imageData, prepareTask, progress, token);
-                        }
-
-                        DynamicSequencer.logger.Information($"Flat: '{project.name}' - '{target.name}' - '{exposure.filter}', {project.flatAmount} frames");
+                        await TakeFlats(project, target, exposure, progress, token);
                     }
                 }
-                project.takeFlats = false;
+
+                project.takeFlatsOverride = false;
+                planner.WriteFiles();
             }
+
+            // exposures in flatLog
+            foreach (KeyValuePair<string, Dictionary<string, List<string>>> projectEntry in DynamicSequencer.flatLog)
+            {
+                PProject project = planner.GetProjectFromString(projectEntry.Key);
+                if (project.flatAmount <= 0 || !project.useMechanicalRotation) continue;
+
+                foreach (KeyValuePair<string, List<string>> targetEntry in projectEntry.Value)
+                {
+                    PTarget target = project.getTargetFromString(targetEntry.Key);
+                    if (target.mechanicalRotation < 0)
+                    {
+                        DynamicSequencer.logger.Warning($"Flat: '{project.name}' - '{target.name}' does not contain rotation info, skipped");
+                        continue;
+                    }
+                    foreach (string exposureEntry in targetEntry.Value)
+                    {
+                        PExposure exposure = target.GetExposureFromString(exposureEntry);
+                        await TakeFlats(project, target, exposure, progress, token);
+                    }
+                }
+            }
+            DynamicSequencer.flatLog.Clear();
+
             await _flatDeviceMediator.ToggleLight(false, progress, token);
-            planner.WriteFiles();
         }
 
         public virtual bool Validate()
@@ -198,6 +159,75 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
             }
             Issues = i;
             return i.Count == 0;
+        }
+
+        private async Task TakeFlats(PProject project, PTarget target, PExposure exposure, IProgress<ApplicationStatus> progress, CancellationToken token)
+        {
+            FilterInfo filter = null;
+            foreach (FilterInfo filterInfo in _profileService.ActiveProfile.FilterWheelSettings.FilterWheelFilters)
+            {
+                if (filterInfo.Name == exposure.filter)
+                {
+                    filter = filterInfo;
+                    break;
+                }
+            }
+            if (filter == null)
+            {
+                DynamicSequencer.logger.Error($"Flat: no matching filter for name '{exposure.filter}', skipped");
+
+                Notification.ShowWarning($"No matching filter name for {exposure.filter}");
+                return;
+            }
+            await _filterWheelMediator.ChangeFilter(filter, token, progress);
+
+            var brightnessInfo = _profileService.ActiveProfile.FlatDeviceSettings.GetTrainedFlatExposureSetting(filter.Position, exposure.binningMode, exposure.gain, exposure.offset);
+            if (brightnessInfo == null)
+            {
+                DynamicSequencer.logger.Error($"Flat: no trained flat exposure for filter '{exposure.filter}', binning {exposure.binning}, gain {exposure.gain}, skipped");
+
+                Notification.ShowWarning($"No trained flat exposure for filter {exposure.filter}, binning {exposure.binning}, gain {exposure.gain}");
+                return;
+            }
+            await _flatDeviceMediator.SetBrightness(brightnessInfo.Brightness, progress, token);
+
+            if (Math.Abs((double)_rotatorMediator.GetInfo().MechanicalPosition - target.mechanicalRotation) > 0.1)
+            {
+                DynamicSequencer.logger.Debug($"Flat: rotate to {target.mechanicalRotation}");
+
+                await _rotatorMediator.MoveMechanical((float)target.mechanicalRotation, token);
+            }
+
+            for (int i = 0; i < project.flatAmount; i++)
+            {
+                DynamicSequencer.logger.Debug($"Flat: '{project.name}' - '{target.name}' - '{exposure.filter}' progress {i + 1}/{project.flatAmount}");
+
+                var capture = new CaptureSequence()
+                {
+                    ExposureTime = brightnessInfo.Time,
+                    Binning = exposure.binningMode,
+                    Gain = exposure.gain,
+                    Offset = exposure.offset,
+                    ImageType = CaptureSequence.ImageTypes.FLAT,
+                    ProgressExposureCount = i,
+                    TotalExposureCount = project.flatAmount
+                };
+
+                var exposureData = await _imagingMediator.CaptureImage(capture, token, progress);
+
+                var imageData = await exposureData.ToImageData(progress, token);
+
+                var prepareTask = _imagingMediator.PrepareImage(imageData, new PrepareImageParameters(null, false), token);
+
+                imageData.MetaData.Target.Name = target.name;
+                imageData.MetaData.Target.Coordinates = target.coordinates;
+                imageData.MetaData.Target.PositionAngle = target.skyRotation;
+                imageData.MetaData.Sequence.Title = project.name;
+
+                await _imageSaveMediator.Enqueue(imageData, prepareTask, progress, token);
+            }
+
+            DynamicSequencer.logger.Information($"Flat: '{project.name}' - '{target.name}' - '{exposure.filter}', {project.flatAmount} frames");
         }
     }
 }
