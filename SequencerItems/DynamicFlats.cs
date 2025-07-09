@@ -89,13 +89,14 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
 
             var planner = new Planner();
 
-            // projects with takeFlatsOverride enabled
+            // projects / targets with takeFlatsOverride enabled
             foreach (PProject project in planner._projects)
             {
-                if (!project.takeFlatsOverride || project.flatAmount <= 0 || !project.useMechanicalRotation) continue;
+                if (project.flatAmount <= 0 || !project.useMechanicalRotation) continue;
 
                 foreach (PTarget target in project.targets)
                 {
+                    if (!project.takeFlatsOverride && !target.takeFlatsOverride) continue;
                     if (target.mechanicalRotation < 0)
                     {
                         DynamicSequencer.logger.Warning($"Flat: '{project.name}' - '{target.name}' does not contain rotation info, skipped");
@@ -106,6 +107,8 @@ namespace DanielHeEGG.NINA.DynamicSequencer.SequencerItems
                     {
                         await TakeFlats(project, target, exposure, progress, token);
                     }
+
+                    target.takeFlatsOverride = false;
                 }
 
                 project.takeFlatsOverride = false;

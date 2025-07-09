@@ -54,6 +54,7 @@ Global plugin settings are located in the `settings.json` file. Settings are lis
 | targets.declination | double | Dec of the target in degrees, J2000 | `0.0` |
 | targets.skyRotation | double | Sky orientation of the target in degrees. This is ignored when `useMechanicalRotation = true` and when there is a valid mechanical rotation value in `targets.mechanicalRotation` | `0.0` |
 | targets.mechanicalRotation | double | Mechanical orientation of the rotator in degrees. When `useMechanicalRotation = true` and set to a value less than zero, the planner will attempt to figure out this value when this target is first selected and will save it to the json file for future use. All subsequent slews and rotates on this target will use this value. If there is a major change in the optical train that renders this value inaccurate, it may be reset by simply changing the value to a number below zero again. | `-1.0` |
+| targets.takeFlatsOverride | bool | Same behavior as `takeFlatsOverride` but only applies to one target.  | `false` |
 | exposureSelectionPriority | list | Criteria for selecting the best exposure. See `Notes on Automatic Target Selection` below. | `[ "SELECTIVITY", "N_COMPLETION" ]` |
 | targets.exposures | list | | |
 | targets.exposures.filter | string | Name of filter, name must match the configured filter name on the filter wheel. | `""` |
@@ -97,6 +98,7 @@ The following project file defines an Andromeda Galaxy LRGBHa project:
       "declination": 41.3956,
       "skyRotation": 55.0,
       "mechanicalRotation": -1.0,
+      "takeFlatsOverride": false,
       "exposureSelectionPriority": [
         "SELECTIVITY",
         "N_COMPLETION"

@@ -18,6 +18,7 @@ namespace DanielHeEGG.NINA.DynamicSequencer.PlannerEngine
         public double declination { get; set; } = 0;
         public double skyRotation { get; set; } = 0;
         public double mechanicalRotation { get; set; } = -1;
+        public bool takeFlatsOverride { get; set; } = false;
         public List<PExposureSelectionPriority> exposureSelectionPriority { get; set; } = [PExposureSelectionPriority.SELECTIVITY, PExposureSelectionPriority.N_COMPLETION];
         public List<PExposure> exposures { get; set; } = [new PExposure()];
 
