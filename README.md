@@ -273,6 +273,9 @@ An example sequence:
 
 
 ## Changelog
+### v3.5.1.0
+- Added option to override flats for each individual target
+
 ### v3.5.0.0
 - Now targeting NINA 3.0.0.3005-rc
 - Redesigned dynamic flat system
